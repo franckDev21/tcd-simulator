@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TCF Canada Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              glass: {
+                100: 'var(--glass-100)',
+                200: 'var(--glass-200)',
+                300: 'var(--glass-300)',
+                border: 'var(--glass-border)',
+                text: 'var(--glass-text)',
+                bg: 'var(--glass-bg)',
+              },
+              primary: {
+                DEFAULT: '#4f46e5',
+                light: '#818cf8',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      :root {
+        /* Default (Dark) Variables */
+        --glass-bg: #0f172a;
+        --glass-100: rgba(255, 255, 255, 0.05);
+        --glass-200: rgba(255, 255, 255, 0.1);
+        --glass-300: rgba(255, 255, 255, 0.15);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --glass-text: #e2e8f0;
+        --gradient-1: hsla(253,16%,7%,1);
+        --gradient-2: hsla(225,39%,30%,1);
+        --gradient-3: hsla(339,49%,30%,1);
+      }
+
+      html.light {
+        --glass-bg: #f8fafc;
+        --glass-100: rgba(255, 255, 255, 0.6);
+        --glass-200: rgba(255, 255, 255, 0.8);
+        --glass-300: rgba(255, 255, 255, 0.9);
+        --glass-border: rgba(0, 0, 0, 0.1);
+        --glass-text: #1e293b;
+        --gradient-1: #e0e7ff;
+        --gradient-2: #dbeafe;
+        --gradient-3: #f3e8ff;
+      }
+
+      body {
+        background-color: var(--glass-bg);
+        background-image: 
+          radial-gradient(at 0% 0%, var(--gradient-1) 0, transparent 50%), 
+          radial-gradient(at 50% 0%, var(--gradient-2) 0, transparent 50%), 
+          radial-gradient(at 100% 0%, var(--gradient-3) 0, transparent 50%);
+        background-attachment: fixed;
+        color: var(--glass-text);
+        transition: background-color 0.5s ease, color 0.5s ease;
+      }
+      
+      .glass-card {
+        background: var(--glass-100);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--glass-200);
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--glass-300);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "zustand": "https://aistudiocdn.com/zustand@^5.0.3"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
