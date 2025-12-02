@@ -1,5 +1,5 @@
-
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { ViewState, User, ModuleType } from '../types';
 
 interface AppState {
@@ -27,47 +27,55 @@ interface AppState {
   upgradeUser: () => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
-  view: 'LANDING',
-  theme: 'dark',
-  isAuthModalOpen: false,
-  user: null,
-  activeModule: null,
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      view: 'LANDING',
+      theme: 'dark',
+      isAuthModalOpen: false,
+      user: null,
+      activeModule: null,
 
-  setView: (view) => set({ view }),
-  
-  toggleTheme: () => set((state) => {
-    const newTheme = state.theme === 'dark' ? 'light' : 'dark';
-    // Update HTML class for Tailwind
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.classList.add('light');
+      setView: (view) => set({ view }),
+      
+      toggleTheme: () => set((state) => {
+        const newTheme = state.theme === 'dark' ? 'light' : 'dark';
+        // Update HTML class for Tailwind
+        if (newTheme === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        }
+        return { theme: newTheme };
+      }),
+
+      toggleAuthModal: (isOpen) => set({ isAuthModalOpen: isOpen }),
+
+      login: (user) => set({ user, isAuthModalOpen: false, view: 'DASHBOARD' }),
+      
+      logout: () => set({ user: null, view: 'LANDING', activeModule: null }),
+
+      updateUser: (updatedData) => set((state) => ({
+        user: state.user ? { ...state.user, ...updatedData } : null,
+        view: 'PROFILE' // Return to profile after update
+      })),
+
+      openSeriesSelection: (module) => set({ activeModule: module, view: 'SERIES_SELECTION' }),
+
+      startExam: (module) => set({ activeModule: module, view: 'EXAM_RUNNER' }),
+      
+      completeExam: () => set({ view: 'RESULTS' }), 
+
+      upgradeUser: () => set((state) => ({ 
+        user: state.user ? { ...state.user, isPremium: true, subscriptionPlan: 'monthly' } : null,
+        view: 'DASHBOARD'
+      }))
+    }),
+    {
+      name: 'tcf-storage', // unique name for localStorage
+      partialize: (state) => ({ user: state.user, theme: state.theme }), // Only persist user and theme
     }
-    return { theme: newTheme };
-  }),
-
-  toggleAuthModal: (isOpen) => set({ isAuthModalOpen: isOpen }),
-
-  login: (user) => set({ user, isAuthModalOpen: false, view: 'DASHBOARD' }),
-  
-  logout: () => set({ user: null, view: 'LANDING' }),
-
-  updateUser: (updatedData) => set((state) => ({
-    user: state.user ? { ...state.user, ...updatedData } : null,
-    view: 'PROFILE' // Return to profile after update
-  })),
-
-  openSeriesSelection: (module) => set({ activeModule: module, view: 'SERIES_SELECTION' }),
-
-  startExam: (module) => set({ activeModule: module, view: 'EXAM_RUNNER' }),
-  
-  completeExam: () => set({ view: 'RESULTS' }), 
-
-  upgradeUser: () => set((state) => ({ 
-    user: state.user ? { ...state.user, isPremium: true, subscriptionPlan: 'monthly' } : null,
-    view: 'DASHBOARD'
-  }))
-}));
+  )
+);
