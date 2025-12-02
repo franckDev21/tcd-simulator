@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr" class="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TCF Canada Simulator</title>
+    <title>PRIMO</title>
+    <meta name="application-name" content="PRIMO">
+    <meta property="og:site_name" content="PRIMO">
+    <meta name="twitter:title" content="PRIMO">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
@@ -34,7 +37,21 @@
     </script>
     <style>
       :root {
-        /* Default (Dark) Variables */
+        /* Default (Light) Variables - Perfect Light Mode */
+        --glass-bg: #FFFFFF;
+        --glass-100: rgba(255, 255, 255, 0.7);
+        --glass-200: rgba(243, 244, 246, 0.8);
+        --glass-300: rgba(229, 231, 235, 0.8);
+        /* Darkened border for better visibility in light mode (0.12 -> 0.15) */
+        --glass-border: rgba(0, 0, 0, 0.15); 
+        --glass-text: #1A1A1A;
+        /* Subtle gradients for light mode */
+        --gradient-1: rgba(59, 130, 246, 0.08);
+        --gradient-2: rgba(99, 102, 241, 0.08);
+        --gradient-3: rgba(236, 72, 153, 0.08);
+      }
+
+      html.dark {
         --glass-bg: #0f172a;
         --glass-100: rgba(255, 255, 255, 0.05);
         --glass-200: rgba(255, 255, 255, 0.1);
@@ -46,17 +63,27 @@
         --gradient-3: hsla(339,49%,30%,1);
       }
 
-      html.light {
-        --glass-bg: #f8fafc;
-        --glass-100: rgba(255, 255, 255, 0.6);
-        --glass-200: rgba(255, 255, 255, 0.8);
-        --glass-300: rgba(255, 255, 255, 0.9);
-        --glass-border: rgba(0, 0, 0, 0.1);
-        --glass-text: #1e293b;
-        --gradient-1: #e0e7ff;
-        --gradient-2: #dbeafe;
-        --gradient-3: #f3e8ff;
+      /* Light Mode High Contrast Overrides */
+      html.light .text-slate-300 { color: #475569 !important; } /* slate-600 */
+      html.light .text-slate-400 { color: #334155 !important; } /* slate-700 */
+      html.light .text-slate-500 { color: #1e293b !important; } /* slate-800 */
+      html.light .text-blue-400 { color: #2563eb !important; } /* blue-600 */
+      html.light .text-indigo-400 { color: #4f46e5 !important; } /* indigo-600 */
+      html.light .text-purple-400 { color: #9333ea !important; } /* purple-600 */
+      html.light .text-emerald-400 { color: #059669 !important; } /* emerald-600 */
+      html.light .text-amber-400 { color: #d97706 !important; } /* amber-600 */
+      html.light .text-rose-400 { color: #e11d48 !important; } /* rose-600 */
+      
+      /* Placeholder Visibility Fixes for Light Mode */
+      html.light input::placeholder, 
+      html.light textarea::placeholder { 
+        color: #64748b !important; /* slate-500 */
+        opacity: 1; 
       }
+      
+      /* Handle Gradient Text in Light Mode */
+      html.light .from-blue-400 { --tw-gradient-from: #2563eb !important; }
+      html.light .to-indigo-500 { --tw-gradient-to: #4f46e5 !important; }
 
       body {
         background-color: var(--glass-bg);

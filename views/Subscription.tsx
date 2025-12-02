@@ -20,7 +20,7 @@ export const Subscription: React.FC = () => {
     setTimeout(() => {
       setLoading(false);
       upgradeUser();
-      alert("Paiement réussi ! Bienvenue dans TCF Premium.");
+      alert("Paiement réussi ! Bienvenue dans PRIMO Premium.");
     }, 2000);
   };
 
@@ -114,7 +114,7 @@ export const Subscription: React.FC = () => {
                    <input 
                     type="text" 
                     placeholder={selectedMethod === 'VISA' ? "0000 0000 0000 0000" : "6XX XX XX XX"}
-                    className="w-full bg-glass-100 border border-glass-border rounded-xl pl-10 pr-4 py-3 outline-none focus:border-blue-500 transition-all text-sm"
+                    className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 outline-none focus:border-blue-500 transition-all text-sm"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                    />

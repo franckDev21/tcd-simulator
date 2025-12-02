@@ -1,12 +1,11 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ModuleType, Question, CorrectionResult, UserResult } from '../types';
 import { GlassCard, Button, ProgressBar } from '../components/GlassUI';
-import { Timer, Volume2, Flag, ChevronLeft, ChevronRight, Check, Download, Bold, Italic, Underline, List, Heading1, Quote, Eraser } from 'lucide-react';
+import { Timer, Volume2, Flag, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { gradeWritingSubmission } from '../services/geminiService';
 import { VoiceRecorder } from '../components/VoiceRecorder';
 import { useAppStore } from '../store/useAppStore';
-import { jsPDF } from 'jspdf';
 
 interface ExamRunnerProps {
   module: ModuleType;
@@ -23,9 +22,6 @@ export const ExamRunner: React.FC<ExamRunnerProps> = ({ module, questions }) => 
   const [isFinished, setIsFinished] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [correctionResult, setCorrectionResult] = useState<CorrectionResult | null>(null);
-  
-  // Ref for Textarea to handle cursor position
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (isFinished) return;
@@ -96,215 +92,6 @@ export const ExamRunner: React.FC<ExamRunnerProps> = ({ module, questions }) => 
     }
   };
 
-  const handleDownloadPDF = () => {
-    const text = answers[currentQ.id] || "";
-    if (!text.trim()) {
-        alert("Veuillez écrire du texte avant de télécharger.");
-        return;
-    }
-    
-    const doc = new jsPDF();
-    const margin = 20;
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const maxLineWidth = pageWidth - (margin * 2);
-    let yPos = 20;
-
-    // --- Helper Functions for Markdown Rendering ---
-    
-    const checkPageBreak = (heightNeeded: number) => {
-      if (yPos + heightNeeded > 280) {
-        doc.addPage();
-        yPos = 20;
-      }
-    };
-
-    const renderHeader = () => {
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(22);
-        doc.setTextColor(79, 70, 229); // Indigo/Primary
-        doc.text("Expression Écrite - Copie Officielle", margin, yPos);
-        yPos += 10;
-        
-        doc.setFontSize(10);
-        doc.setTextColor(150);
-        doc.text("Généré le " + new Date().toLocaleDateString("fr-FR"), margin, yPos);
-        yPos += 20;
-    };
-
-    const renderSubject = () => {
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.setTextColor(0);
-        doc.text("Sujet", margin, yPos);
-        yPos += 8;
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
-        doc.setTextColor(60);
-        const splitQuestion = doc.splitTextToSize(currentQ.text, maxLineWidth);
-        doc.text(splitQuestion, margin, yPos);
-        yPos += splitQuestion.length * 6 + 15;
-    };
-
-    // --- Main Rendering Logic ---
-    
-    renderHeader();
-    renderSubject();
-
-    // Section Title
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor(0);
-    doc.text("Votre Rédaction", margin, yPos);
-    yPos += 10;
-
-    // Reset Font for Body
-    doc.setFontSize(11);
-    doc.setTextColor(0);
-
-    const lines = text.split('\n');
-    const lineHeight = 6;
-
-    lines.forEach((line) => {
-        // Reset styles for each line
-        let fontSize = 11;
-        let fontStyle = "normal";
-        let xOffset = margin;
-        let textColor = [0, 0, 0]; // Black
-        let cleanLine = line;
-        
-        // 1. Check for Block Styles (Heading, List, Quote)
-        if (line.startsWith('# ')) {
-            fontSize = 16;
-            fontStyle = "bold";
-            cleanLine = line.substring(2);
-            yPos += 4; // Extra space before heading
-        } else if (line.startsWith('- ')) {
-            xOffset = margin + 5;
-            cleanLine = line.substring(2);
-            // Draw bullet
-            doc.setFontSize(14);
-            doc.text("•", margin, yPos); 
-        } else if (line.startsWith('> ')) {
-            fontStyle = "italic";
-            textColor = [100, 116, 139]; // Slate 500
-            xOffset = margin + 10;
-            cleanLine = line.substring(2);
-            // Draw bar
-            doc.setDrawColor(203, 213, 225);
-            doc.setLineWidth(1);
-            doc.line(margin + 2, yPos - 4, margin + 2, yPos + 2);
-        }
-
-        // Apply Block Styles
-        doc.setFontSize(fontSize);
-        doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-
-        // 2. Handle Inline Styles (Bold) and Line Wrapping
-        // We split by ** to find bold segments
-        // Note: Simple parser, assumes matching ** pairs.
-        
-        const segments = cleanLine.split(/(\*\*.*?\*\*)/g);
-        let currentX = xOffset;
-        
-        // Calculate max width for this specific line type
-        const currentMaxWidth = maxLineWidth - (xOffset - margin);
-
-        // We need to buffer words and print them to handle wrapping with mixed styles
-        let lineBuffer: {text: string, style: string, width: number}[] = [];
-        let currentLineWidth = 0;
-
-        segments.forEach(segment => {
-            let isBold = false;
-            let content = segment;
-            
-            if (segment.startsWith('**') && segment.endsWith('**')) {
-                isBold = true;
-                content = segment.substring(2, segment.length - 2);
-            }
-
-            // If line style is already bold (Header), force bold. 
-            // If line style is italic (Quote), use bolditalic if available or just bold.
-            // jspdf standard fonts: normal, bold, italic, bolditalic
-            
-            let segmentStyle = fontStyle;
-            if (isBold) {
-                 if (fontStyle === "normal") segmentStyle = "bold";
-                 else if (fontStyle === "italic") segmentStyle = "bolditalic";
-                 // if already bold, stay bold
-            }
-
-            // Split into words to handle wrapping
-            const words = content.split(' ');
-            
-            words.forEach((word, wIdx) => {
-                // Add space after word unless it's the last word of segment AND not the last segment
-                // Simplification: always add space, trim later?
-                // Better: join with space when printing.
-                
-                const wordWithSpace = word + (wIdx < words.length - 1 ? " " : ""); 
-                
-                // Measure word
-                doc.setFont("helvetica", segmentStyle);
-                const wordWidth = doc.getTextWidth(wordWithSpace);
-
-                // Check wrap
-                if (currentLineWidth + wordWidth > currentMaxWidth) {
-                    // FLUSH BUFFER TO PDF
-                    checkPageBreak(lineHeight);
-                    
-                    let printX = xOffset;
-                    lineBuffer.forEach(item => {
-                        doc.setFont("helvetica", item.style);
-                        doc.text(item.text, printX, yPos);
-                        printX += item.width;
-                    });
-
-                    // New Line
-                    yPos += lineHeight;
-                    lineBuffer = [];
-                    currentLineWidth = 0;
-                    
-                    // Add current word to new line
-                    // If word starts with space (from split), trim it for start of line?
-                    // The split(' ') removes spaces, so word is clean.
-                    
-                    lineBuffer.push({ text: wordWithSpace, style: segmentStyle, width: wordWidth });
-                    currentLineWidth += wordWidth;
-
-                } else {
-                    lineBuffer.push({ text: wordWithSpace, style: segmentStyle, width: wordWidth });
-                    currentLineWidth += wordWidth;
-                }
-            });
-            
-            // Add a space after the segment if it wasn't the last one
-            // This is tricky with split. Simple split by ** preserves boundary.
-            // We assume segments might need spacing.
-        });
-
-        // Flush remaining buffer (Final line of the paragraph)
-        if (lineBuffer.length > 0) {
-            checkPageBreak(lineHeight);
-            let printX = xOffset;
-            lineBuffer.forEach(item => {
-                doc.setFont("helvetica", item.style);
-                doc.text(item.text, printX, yPos);
-                printX += item.width;
-            });
-            yPos += lineHeight;
-        }
-
-        // Add extra spacing after paragraph if it was a newline
-        // If the original line was empty, just add spacing
-        if (lines.length > 1) {
-            yPos += 2; 
-        }
-    });
-
-    doc.save(`Expression_Ecrite_${new Date().getTime()}.pdf`);
-  };
-
   const getLevel = (score: number) => {
     if (score < 100) return "A1";
     if (score < 200) return "A2";
@@ -329,59 +116,6 @@ export const ExamRunner: React.FC<ExamRunnerProps> = ({ module, questions }) => 
     return text.trim().split(/\s+/).length;
   };
 
-  // --- TEXT FORMATTING LOGIC ---
-  const handleFormat = (type: 'bold' | 'italic' | 'underline' | 'list' | 'h1' | 'quote') => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = answers[currentQ.id] || '';
-    
-    const before = text.substring(0, start);
-    const selection = text.substring(start, end);
-    const after = text.substring(end);
-
-    let newText = text;
-    let newCursorPos = end;
-
-    switch (type) {
-      case 'bold':
-        newText = `${before}**${selection}**${after}`;
-        newCursorPos = end + 4;
-        break;
-      case 'italic':
-        newText = `${before}*${selection}*${after}`;
-        newCursorPos = end + 2;
-        break;
-      case 'underline':
-        // Markdown doesn't standardly support underline, using __ as a common substitute or visually distinct marker
-        newText = `${before}__${selection}__${after}`;
-        newCursorPos = end + 4;
-        break;
-      case 'list':
-        newText = `${before}\n- ${selection}${after}`;
-        newCursorPos = end + 3;
-        break;
-      case 'h1':
-        newText = `${before}\n# ${selection}${after}`;
-        newCursorPos = end + 3;
-        break;
-      case 'quote':
-        newText = `${before}\n> ${selection}${after}`;
-        newCursorPos = end + 3;
-        break;
-    }
-
-    setAnswers({...answers, [currentQ.id]: newText});
-    
-    // Restore focus and update cursor
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-    }, 0);
-  };
-
   if (loadingCorrection) {
     return (
       <div className="h-[80vh] flex items-center justify-center flex-col animate-fade-in">
@@ -394,64 +128,6 @@ export const ExamRunner: React.FC<ExamRunnerProps> = ({ module, questions }) => 
 
   const currentQ = questions[currentIdx];
   const isLast = currentIdx === questions.length - 1;
-
-  // --- NAVIGATION COMPONENT ---
-  const QuestionNavigator = () => (
-    <div className="mb-6 animate-fade-in">
-      <div className="bg-glass-100 border border-glass-border rounded-xl p-4">
-        {/* Grid of Numbers */}
-        <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar justify-start content-start">
-          {questions.map((q, idx) => {
-            const isAnswered = answers[q.id] !== undefined;
-            const isCurrent = idx === currentIdx;
-            const isFlagged = flagged[q.id];
-
-            let btnClass = "w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 border ";
-            
-            if (isCurrent) {
-               // Current: White/Glass Highlight with ring
-               btnClass += "bg-white text-black border-blue-500 ring-2 ring-blue-500/30 scale-110 shadow-lg font-bold";
-            } else if (isFlagged) {
-               // Review: Yellow
-               btnClass += "bg-yellow-400 text-yellow-900 border-yellow-500 shadow-md";
-            } else if (isAnswered) {
-               // Answered: Dark
-               btnClass += "bg-slate-700 text-white border-slate-600";
-            } else {
-               // Default
-               btnClass += "bg-glass-200 text-slate-400 border-transparent hover:bg-glass-300";
-            }
-
-            return (
-              <button 
-                key={q.id}
-                onClick={() => setCurrentIdx(idx)}
-                className={btnClass}
-              >
-                {idx + 1}
-              </button>
-            );
-          })}
-        </div>
-        
-        {/* Legend */}
-        <div className="flex items-center gap-6 mt-4 pt-3 border-t border-glass-border text-xs text-slate-400">
-           <div className="flex items-center gap-2">
-             <div className="w-3 h-3 rounded-full bg-white border border-blue-500 ring-1 ring-blue-500/30"></div>
-             <span>Actuel</span>
-           </div>
-           <div className="flex items-center gap-2">
-             <div className="w-3 h-3 rounded-full bg-yellow-400 border border-yellow-500"></div>
-             <span>Révision</span>
-           </div>
-           <div className="flex items-center gap-2">
-             <div className="w-3 h-3 rounded-full bg-slate-700 border border-slate-600"></div>
-             <span>Répondu</span>
-           </div>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-8 flex flex-col min-h-[calc(100vh-64px)]">
@@ -472,14 +148,63 @@ export const ExamRunner: React.FC<ExamRunnerProps> = ({ module, questions }) => 
         <ProgressBar value={Object.keys(answers).length} max={questions.length} label={`Progression: ${Math.round((Object.keys(answers).length / questions.length) * 100)}%`} />
       </div>
 
-      {/* Question Navigator (The requested feature) */}
-      <QuestionNavigator />
+      {/* Question Navigator (Inlined to prevent re-renders resetting scroll) */}
+      <div className="mb-6 animate-fade-in">
+        <div className="bg-glass-100 border border-glass-border rounded-xl p-4">
+          {/* Grid of Numbers */}
+          <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar justify-start content-start">
+            {questions.map((q, idx) => {
+              const isAnswered = answers[q.id] !== undefined;
+              const isCurrent = idx === currentIdx;
+              const isFlagged = flagged[q.id];
+
+              let btnClass = "w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 border ";
+              
+              if (isCurrent) {
+                 btnClass += "bg-white text-black border-blue-500 ring-2 ring-blue-500/30 scale-110 shadow-lg font-bold";
+              } else if (isFlagged) {
+                 btnClass += "bg-yellow-400 text-yellow-900 border-yellow-500 shadow-md";
+              } else if (isAnswered) {
+                 btnClass += "bg-slate-700 text-white border-slate-600";
+              } else {
+                 btnClass += "bg-glass-200 text-slate-400 border-transparent hover:bg-glass-300";
+              }
+
+              return (
+                <button 
+                  key={q.id}
+                  onClick={() => setCurrentIdx(idx)}
+                  className={btnClass}
+                >
+                  {idx + 1}
+                </button>
+              );
+            })}
+          </div>
+          
+          {/* Legend */}
+          <div className="flex items-center gap-6 mt-4 pt-3 border-t border-glass-border text-xs text-slate-400">
+             <div className="flex items-center gap-2">
+               <div className="w-3 h-3 rounded-full bg-white border border-blue-500 ring-1 ring-blue-500/30"></div>
+               <span>Actuel</span>
+             </div>
+             <div className="flex items-center gap-2">
+               <div className="w-3 h-3 rounded-full bg-yellow-400 border border-yellow-500"></div>
+               <span>Révision</span>
+             </div>
+             <div className="flex items-center gap-2">
+               <div className="w-3 h-3 rounded-full bg-slate-700 border border-slate-600"></div>
+               <span>Répondu</span>
+             </div>
+          </div>
+        </div>
+      </div>
 
       {/* Main Question Card */}
       <GlassCard className="flex flex-col relative min-h-[500px]">
         {module === ModuleType.READING || module === ModuleType.LISTENING ? (
           <div className="flex flex-col h-full">
-            {/* Scrollable Content - Removed overflow-y-auto to let it grow naturally */}
+            {/* Scrollable Content */}
             <div className="pb-28">
               
               {/* Question Header & Flag */}
@@ -528,7 +253,7 @@ export const ExamRunner: React.FC<ExamRunnerProps> = ({ module, questions }) => 
                     className={`w-full text-left p-5 rounded-xl border transition-all duration-200 flex items-center gap-4 group ${
                       answers[currentQ.id] === idx 
                         ? 'bg-blue-600 border-blue-400 text-white shadow-lg shadow-blue-500/20' 
-                        : 'bg-glass-100 border-glass-border hover:bg-glass-200 text-slate-300'
+                        : 'bg-glass-200 border-glass-border hover:bg-glass-300 text-slate-300'
                     }`}
                   >
                     <div className={`w-8 h-8 shrink-0 rounded-full border flex items-center justify-center text-sm font-bold transition-colors ${
@@ -551,7 +276,6 @@ export const ExamRunner: React.FC<ExamRunnerProps> = ({ module, questions }) => 
                 disabled={currentIdx === 0}
                 onClick={() => {
                    setCurrentIdx(prev => prev - 1);
-                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className="pl-2"
               >
@@ -562,7 +286,6 @@ export const ExamRunner: React.FC<ExamRunnerProps> = ({ module, questions }) => 
               ) : (
                 <Button onClick={() => {
                    setCurrentIdx(prev => prev + 1);
-                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }} variant="secondary">
                   Suivant <ChevronRight size={18} />
                 </Button>
@@ -574,63 +297,17 @@ export const ExamRunner: React.FC<ExamRunnerProps> = ({ module, questions }) => 
             <div className="mb-4 text-slate-300 bg-glass-200 p-4 rounded-xl border border-glass-border leading-relaxed">
               {currentQ.text}
             </div>
-            
-            {/* Rich Text Editor Container */}
-            <div className="flex-1 flex flex-col bg-glass-100 border border-glass-border rounded-xl overflow-hidden focus-within:border-blue-500/50 transition-colors">
-              
-              {/* Toolbar */}
-              <div className="bg-glass-200 border-b border-glass-border p-2 flex items-center gap-1 overflow-x-auto">
-                 <button onClick={() => handleFormat('bold')} className="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors" title="Gras">
-                    <Bold size={16} />
-                 </button>
-                 <button onClick={() => handleFormat('italic')} className="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors" title="Italique">
-                    <Italic size={16} />
-                 </button>
-                 <button onClick={() => handleFormat('underline')} className="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors" title="Souligner">
-                    <Underline size={16} />
-                 </button>
-                 <div className="w-px h-6 bg-glass-border mx-1"></div>
-                 <button onClick={() => handleFormat('h1')} className="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors" title="Titre">
-                    <Heading1 size={16} />
-                 </button>
-                 <button onClick={() => handleFormat('list')} className="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors" title="Liste">
-                    <List size={16} />
-                 </button>
-                 <button onClick={() => handleFormat('quote')} className="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors" title="Citation">
-                    <Quote size={16} />
-                 </button>
-                 <div className="flex-1"></div>
-                 <button 
-                  onClick={() => setAnswers({...answers, [currentQ.id]: ''})}
-                  className="p-2 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors" 
-                  title="Effacer tout"
-                 >
-                    <Eraser size={16} />
-                 </button>
-              </div>
-
-              {/* Text Area */}
-              <textarea
-                ref={textareaRef}
-                className="flex-1 w-full bg-transparent p-4 text-glass-text outline-none resize-none font-sans leading-relaxed min-h-[400px]"
-                placeholder="Écrivez votre réponse ici..."
-                value={answers[currentQ.id] || ''}
-                onChange={(e) => setAnswers({...answers, [currentQ.id]: e.target.value})}
-              />
-            </div>
-
-            <div className="mt-4 flex flex-col sm:flex-row justify-between items-center text-sm text-slate-500 gap-4">
+            <textarea
+              className="flex-1 w-full bg-glass-200 border border-glass-border rounded-xl p-4 text-glass-text outline-none focus:border-blue-500/50 resize-none font-sans leading-relaxed transition-all focus:bg-glass-300 min-h-[400px]"
+              placeholder="Écrivez votre réponse ici..."
+              value={answers[currentQ.id] || ''}
+              onChange={(e) => setAnswers({...answers, [currentQ.id]: e.target.value})}
+            />
+            <div className="mt-4 flex justify-between items-center text-sm text-slate-500">
               <span className="font-mono text-blue-400 font-bold bg-blue-500/10 px-2 py-1 rounded">
                 {getWordCount(answers[currentQ.id] || '')} mots
               </span>
-              <div className="flex gap-2 w-full sm:w-auto">
-                 <Button variant="secondary" onClick={handleDownloadPDF} icon={Download} className="flex-1 sm:flex-none">
-                    Télécharger
-                 </Button>
-                 <Button onClick={handleFinish} loading={loadingCorrection} className="flex-1 sm:flex-none">
-                    Soumettre pour correction
-                 </Button>
-              </div>
+              <Button onClick={handleFinish} loading={loadingCorrection}>Soumettre pour correction</Button>
             </div>
           </div>
         ) : (

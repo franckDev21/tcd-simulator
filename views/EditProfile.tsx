@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { User, Mail, Phone, Lock, Camera, Save, ArrowLeft } from 'lucide-react';
 import { GlassCard, Button } from '../components/GlassUI';
@@ -98,7 +97,7 @@ export const EditProfile: React.FC = () => {
                       type="text" 
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className="w-full bg-glass-100 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" 
+                      className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" 
                     />
                   </div>
                 </div>
@@ -110,7 +109,7 @@ export const EditProfile: React.FC = () => {
                       type="email" 
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
-                      className="w-full bg-glass-100 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" 
+                      className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" 
                     />
                   </div>
                 </div>
@@ -125,7 +124,7 @@ export const EditProfile: React.FC = () => {
                     placeholder="+237 6XX XX XX XX"
                     value={formData.phoneNumber}
                     onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
-                    className="w-full bg-glass-100 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" 
+                    className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" 
                   />
                 </div>
               </div>
@@ -140,7 +139,7 @@ export const EditProfile: React.FC = () => {
                       placeholder="Mot de passe actuel"
                       value={passwordData.current}
                       onChange={(e) => setPasswordData({...passwordData, current: e.target.value})}
-                      className="w-full bg-glass-100 border border-glass-border rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" 
+                      className="w-full bg-glass-200 border border-glass-border rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" 
                     />
                     <div className="grid md:grid-cols-2 gap-4">
                       <input 
@@ -148,14 +147,14 @@ export const EditProfile: React.FC = () => {
                         placeholder="Nouveau mot de passe"
                         value={passwordData.new}
                         onChange={(e) => setPasswordData({...passwordData, new: e.target.value})}
-                        className="w-full bg-glass-100 border border-glass-border rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" 
+                        className="w-full bg-glass-200 border border-glass-border rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" 
                       />
                       <input 
                         type="password" 
                         placeholder="Confirmer le nouveau mot de passe"
                         value={passwordData.confirm}
                         onChange={(e) => setPasswordData({...passwordData, confirm: e.target.value})}
-                        className="w-full bg-glass-100 border border-glass-border rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" 
+                        className="w-full bg-glass-200 border border-glass-border rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" 
                       />
                     </div>
                 </div>

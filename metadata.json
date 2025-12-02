@@ -1,5 +1,5 @@
 {
-  "name": "TCF Canada Simulator",
+  "name": "PRIMO",
   "description": "A premium, glassy-styled TCF Canada exam simulator with AI-powered corrections.",
   "requestFramePermissions": [
     "microphone"

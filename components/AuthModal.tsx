@@ -44,7 +44,7 @@ export const AuthModal: React.FC = () => {
                 <label className="block text-xs font-medium text-slate-500 mb-1">Nom complet</label>
                 <div className="relative">
                   <UserIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <input type="text" className="w-full bg-glass-100 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" placeholder="Votre nom" />
+                  <input type="text" className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" placeholder="Votre nom" />
                 </div>
               </div>
             )}
@@ -52,14 +52,14 @@ export const AuthModal: React.FC = () => {
               <label className="block text-xs font-medium text-slate-500 mb-1">Email</label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input type="email" className="w-full bg-glass-100 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" placeholder="nom@exemple.com" />
+                <input type="email" className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" placeholder="nom@exemple.com" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1">Mot de passe</label>
               <div className="relative">
                 <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input type="password" className="w-full bg-glass-100 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" placeholder="••••••••" />
+                <input type="password" className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" placeholder="••••••••" />
               </div>
             </div>
 

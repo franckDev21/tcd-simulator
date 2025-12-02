@@ -26,7 +26,7 @@ export const Landing: React.FC = () => {
         <div className="max-w-4xl w-full text-center z-10 space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-glass-100 border border-glass-border backdrop-blur-md text-sm text-blue-400 font-medium animate-fade-in-up">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-            Simulateur TCF Canada v2.0
+            PRIMO v2.0
           </div>
           
           <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-glass-text leading-tight">
@@ -230,14 +230,14 @@ export const Landing: React.FC = () => {
                </div>
                <div className="mb-6 relative">
                   <span className="text-6xl text-indigo-500/20 font-serif absolute -top-4 -left-4">"</span>
-                  <p className="text-white font-medium italic relative z-10 text-lg">L'interface est EXACTEMENT comme le jour de l'examen. Ça m'a permis de gérer mon stress. Le chronomètre ne me fait plus peur. C'est le meilleur investissement que j'ai fait.</p>
+                  <p className="text-glass-text font-medium italic relative z-10 text-lg">L'interface est EXACTEMENT comme le jour de l'examen. Ça m'a permis de gérer mon stress. Le chronomètre ne me fait plus peur. C'est le meilleur investissement que j'ai fait.</p>
                </div>
                <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 p-[2px]">
                      <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-white font-bold text-lg">J</div>
                   </div>
                   <div>
-                     <div className="font-bold text-white">Jean-Marc D.</div>
+                     <div className="font-bold text-glass-text">Jean-Marc D.</div>
                      <div className="text-xs text-blue-400">Ingénieur • Cameroun</div>
                   </div>
                </div>
@@ -326,7 +326,7 @@ export const Landing: React.FC = () => {
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
           <div className="relative z-10">
             <h2 className="text-2xl md:text-5xl font-bold text-white mb-6">Prêt à obtenir votre score C2 ?</h2>
-            <p className="text-blue-100 text-base md:text-lg mb-8 max-w-2xl mx-auto">Rejoignez plus de 10 000 candidats qui ont réussi leur immigration grâce à TCF Simulator.</p>
+            <p className="text-blue-100 text-base md:text-lg mb-8 max-w-2xl mx-auto">Rejoignez plus de 10 000 candidats qui ont réussi leur immigration grâce à PRIMO.</p>
             <Button onClick={handleStart} className="w-full md:w-auto bg-white text-blue-900 hover:bg-blue-50 border-none text-lg px-8 py-4 h-auto shadow-xl mx-auto">
               Commencer l'entraînement maintenant
             </Button>

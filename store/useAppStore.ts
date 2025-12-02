@@ -31,7 +31,7 @@ export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       view: 'LANDING',
-      theme: 'dark',
+      theme: 'light',
       isAuthModalOpen: false,
       user: null,
       activeModule: null,

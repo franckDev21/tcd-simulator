@@ -22,123 +22,165 @@ export const ResultsView: React.FC = () => {
 
   // Correction is relevant mainly for Reading/Listening (QCM) or if we have detailed QCM data
   const hasQCMCorrection = (result.module === ModuleType.READING || result.module === ModuleType.LISTENING) && result.questions;
-  const isWriting = result.module === ModuleType.WRITING;
 
   const handleExportPDF = () => {
+    // @ts-ignore
     const doc = new jsPDF();
-    const margin = 20;
     const pageWidth = doc.internal.pageSize.getWidth();
-    const maxTextWidth = pageWidth - (margin * 2);
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const maxLineWidth = pageWidth - margin * 2;
     let yPos = 20;
 
-    // Header
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.setTextColor(79, 70, 229); // Indigo/Primary
-    doc.text("Rapport TCF Simulator", margin, yPos);
-    yPos += 10;
-
-    doc.setFontSize(10);
-    doc.setTextColor(150);
-    doc.text("Généré le " + new Date().toLocaleDateString("fr-FR"), margin, yPos);
-    yPos += 20;
-
-    // Exam Details Box
-    doc.setDrawColor(220);
-    doc.setFillColor(248, 250, 252);
-    doc.roundedRect(margin, yPos, maxTextWidth, 35, 3, 3, 'FD');
-    
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(12);
-    doc.setTextColor(0);
-    
-    let boxY = yPos + 10;
-    doc.text(`Module : ${result.module}`, margin + 5, boxY);
-    boxY += 8;
-    doc.text(`Niveau estimé : ${result.level}`, margin + 5, boxY);
-    boxY += 8;
-    doc.text(`Score : ${result.score}/699`, margin + 5, boxY);
-    
-    yPos += 45;
-
-    // Subject (Question)
-    const questionText = result.questions?.[0]?.text || "Sujet non disponible";
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor(0);
-    doc.text("Sujet de l'examen", margin, yPos);
-    yPos += 8;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.setTextColor(60);
-    const splitQuestion = doc.splitTextToSize(questionText, maxTextWidth);
-    doc.text(splitQuestion, margin, yPos);
-    yPos += splitQuestion.length * 6 + 15;
-
-    // User Answer
-    const userAnswer = result.userAnswers?.[result.questions?.[0]?.id] || "";
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor(0);
-    doc.text("Votre Réponse", margin, yPos);
-    yPos += 8;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.setTextColor(60);
-    
-    // Check page break before printing answer
-    const splitAnswer = doc.splitTextToSize(userAnswer, maxTextWidth);
-    if (yPos + (splitAnswer.length * 6) > 280) {
+    // Helper to check page break
+    const checkPageBreak = (heightNeeded: number) => {
+      if (yPos + heightNeeded > pageHeight - margin) {
         doc.addPage();
         yPos = 20;
-    }
-    doc.text(splitAnswer, margin, yPos);
-    yPos += splitAnswer.length * 6 + 15;
+      }
+    };
 
-    // Feedback section (if available)
-    if (result.feedback) {
-        if (yPos > 240) { doc.addPage(); yPos = 20; }
-        
-        doc.setDrawColor(79, 70, 229);
-        doc.setLineWidth(0.5);
-        doc.line(margin, yPos, pageWidth - margin, yPos);
-        yPos += 15;
+    // Header Background
+    doc.setFillColor(79, 70, 229); // Primary Indigo
+    doc.rect(0, 0, pageWidth, 40, 'F');
 
-        doc.setFont("helvetica", "bold");
+    // Header Text
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("Rapport de Performance", margin, 20);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("PRIMO", margin, 30);
+
+    yPos = 55;
+
+    // Meta Info Section
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Module :`, margin, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.text(result.module, margin + 25, yPos);
+    yPos += 7;
+
+    doc.setFont("helvetica", "bold");
+    doc.text(`Date :`, margin, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.text(result.date, margin + 25, yPos);
+    yPos += 7;
+
+    doc.setFont("helvetica", "bold");
+    doc.text(`Niveau :`, margin, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${result.level} (${result.score}/699)`, margin + 25, yPos);
+    yPos += 15;
+
+    // Separator
+    doc.setDrawColor(200, 200, 200);
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    yPos += 15;
+
+    // 1. Sujet (Prompt)
+    if (result.questions && result.questions.length > 0) {
+        checkPageBreak(30);
         doc.setFontSize(14);
-        doc.setTextColor(79, 70, 229);
-        doc.text("Analyse & Correction IA", margin, yPos);
-        yPos += 10;
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(50, 50, 50);
+        doc.text("Sujet", margin, yPos);
+        yPos += 8;
 
-        doc.setFont("helvetica", "normal");
         doc.setFontSize(11);
-        doc.setTextColor(40);
+        doc.setFont("helvetica", "italic");
+        doc.setTextColor(80, 80, 80);
         
-        const feedbackText = result.feedback.replace(/\*\*/g, ""); // Clean formatting
-        const splitFeedback = doc.splitTextToSize(feedbackText, maxTextWidth);
-        doc.text(splitFeedback, margin, yPos);
-        yPos += splitFeedback.length * 6 + 15;
+        const questionText = result.questions[0].text;
+        const splitQuestion = doc.splitTextToSize(questionText, maxLineWidth);
+        doc.text(splitQuestion, margin, yPos);
+        yPos += (splitQuestion.length * 6) + 10;
     }
 
+    // 2. User Answer
+    if (result.userAnswers && result.questions && result.questions.length > 0) {
+        const qId = result.questions[0].id;
+        const answer = result.userAnswers[qId];
+        
+        if (answer && typeof answer === 'string') {
+            checkPageBreak(30);
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(50, 50, 50);
+            doc.text("Votre Rédaction", margin, yPos);
+            yPos += 8;
+
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(0, 0, 0);
+            
+            const splitAnswer = doc.splitTextToSize(answer, maxLineWidth);
+            
+            splitAnswer.forEach((line: string) => {
+                if (yPos > pageHeight - margin) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                doc.text(line, margin, yPos);
+                yPos += 6;
+            });
+            yPos += 10;
+        }
+    }
+
+    // 3. Feedback
+    if (result.feedback) {
+        checkPageBreak(30);
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(79, 70, 229); // Indigo
+        doc.text("Correction & Analyse IA", margin, yPos);
+        yPos += 8;
+        
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(0, 0, 0);
+        
+        const splitFeedback = doc.splitTextToSize(result.feedback, maxLineWidth);
+        splitFeedback.forEach((line: string) => {
+            if (yPos > pageHeight - margin) {
+                doc.addPage();
+                yPos = 20;
+            }
+            doc.text(line, margin, yPos);
+            yPos += 6;
+        });
+        yPos += 10;
+    }
+    
+    // 4. Corrected Text
     if (result.correctedText) {
-         if (yPos > 240) { doc.addPage(); yPos = 20; }
-         
-         doc.setFont("helvetica", "bold");
-         doc.setFontSize(12);
-         doc.setTextColor(22, 163, 74); // Green
-         doc.text("Proposition de correction :", margin, yPos);
-         yPos += 8;
-         
-         doc.setFont("helvetica", "italic");
-         doc.setFontSize(10);
-         doc.setTextColor(80);
-         const correctionLines = doc.splitTextToSize(result.correctedText, maxTextWidth);
-         doc.text(correctionLines, margin, yPos);
+        checkPageBreak(30);
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(34, 197, 94); // Green
+        doc.text("Suggestion Améliorée", margin, yPos);
+        yPos += 8;
+        
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(0, 0, 0);
+        
+        const splitCorrected = doc.splitTextToSize(result.correctedText, maxLineWidth);
+        splitCorrected.forEach((line: string) => {
+            if (yPos > pageHeight - margin) {
+                doc.addPage();
+                yPos = 20;
+            }
+            doc.text(line, margin, yPos);
+            yPos += 6;
+        });
     }
 
-    doc.save(`TCF_${result.module.replace(/\s+/g, '_')}_${result.date}.pdf`);
+    doc.save(`PRIMO_Expression_Ecrite_${result.date}.pdf`);
   };
 
   return (
@@ -181,14 +223,28 @@ export const ResultsView: React.FC = () => {
       {/* Writing/Speaking AI Feedback */}
       {result.feedback && (
         <div className="w-full mb-8">
-          <Button 
-            variant="secondary" 
-            className="w-full flex justify-between items-center mb-4"
-            onClick={() => setShowDetails(!showDetails)}
-          >
-            <span>Voir l'analyse IA détaillée</span>
-            {showDetails ? <ChevronUp size={18}/> : <ChevronDown size={18}/>}
-          </Button>
+          <div className="flex gap-4 mb-4">
+            <Button 
+                variant="secondary" 
+                className="flex-1 flex justify-between items-center"
+                onClick={() => setShowDetails(!showDetails)}
+            >
+                <span>Voir l'analyse IA détaillée</span>
+                {showDetails ? <ChevronUp size={18}/> : <ChevronDown size={18}/>}
+            </Button>
+            
+            {result.module === ModuleType.WRITING && (
+                <Button 
+                    variant="secondary" 
+                    onClick={handleExportPDF} 
+                    className="bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30 text-blue-300"
+                    title="Télécharger le rapport en PDF"
+                >
+                    <Download size={18} />
+                    <span className="hidden sm:inline ml-2">PDF</span>
+                </Button>
+            )}
+          </div>
 
           {showDetails && (
             <div className="space-y-6 animate-fade-in-down">
@@ -233,12 +289,6 @@ export const ResultsView: React.FC = () => {
           Retour au Dashboard
         </Button>
         
-        {isWriting && (
-            <Button onClick={handleExportPDF} variant="secondary" className="bg-indigo-500/10 hover:bg-indigo-500/20 border-indigo-500/30 text-indigo-300" icon={Download}>
-                Exporter en PDF
-            </Button>
-        )}
-
         {hasQCMCorrection && (
           <Button onClick={() => setView('CORRECTION')} variant="secondary" className="bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30 text-blue-300" icon={Eye}>
             Voir la correction

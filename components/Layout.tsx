@@ -20,10 +20,10 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           {/* Logo */}
           <button onClick={handleLogoClick} className="flex items-center gap-2 group shrink-0">
             <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs md:text-sm shadow-lg group-hover:shadow-blue-500/30 transition-all">
-              T
+              P
             </div>
             <span className="font-bold text-lg md:text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500 group-hover:to-blue-400 transition-all">
-              TCF<span className="hidden xs:inline"> SIMULATOR</span>
+              PRIMO
             </span>
           </button>
 
@@ -103,7 +103,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       <footer className="border-t border-glass-border bg-glass-100 py-12 mt-auto backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-8 text-sm">
           <div className="col-span-1 md:col-span-2">
-             <div className="font-bold text-lg mb-4 text-glass-text">TCF SIMULATOR</div>
+             <div className="font-bold text-lg mb-4 text-glass-text">PRIMO</div>
              <p className="text-slate-500 max-w-xs leading-relaxed">
                La plateforme n°1 pour la préparation du TCF Canada. Simulations conformes, corrections IA et suivi de progression.
              </p>
@@ -126,7 +126,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-glass-border text-center text-slate-600 text-xs">
-          © 2024 TCF Simulator. Tous droits réservés.
+          © 2024 PRIMO. Tous droits réservés.
         </div>
       </footer>
     </div>
