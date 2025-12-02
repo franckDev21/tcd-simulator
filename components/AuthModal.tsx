@@ -24,9 +24,9 @@ export const AuthModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-md p-4">
-        <GlassCard className="w-full">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4">
+      <div className="relative w-full max-w-md w-[95%]">
+        <GlassCard className="w-full max-h-[90vh] overflow-y-auto custom-scrollbar">
           <button 
             onClick={() => toggleAuthModal(false)}
             className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"

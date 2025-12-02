@@ -12,44 +12,54 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-glass-text transition-colors duration-500">
+    <div className="min-h-screen flex flex-col font-sans text-glass-text transition-colors duration-500 overflow-x-hidden">
       {/* Header */}
       <nav className="sticky top-0 z-50 border-b border-glass-border bg-glass-100 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
           
           {/* Logo */}
-          <button onClick={handleLogoClick} className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-blue-500/30 transition-all">
+          <button onClick={handleLogoClick} className="flex items-center gap-2 group shrink-0">
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs md:text-sm shadow-lg group-hover:shadow-blue-500/30 transition-all">
               T
             </div>
-            <span className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500 group-hover:to-blue-400 transition-all">
-              TCF SIMULATOR
+            <span className="font-bold text-lg md:text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500 group-hover:to-blue-400 transition-all">
+              TCF<span className="hidden xs:inline"> SIMULATOR</span>
             </span>
           </button>
 
           {/* Right Nav */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <button 
               onClick={toggleTheme}
-              className="p-2 rounded-full hover:bg-glass-200 text-glass-text transition-colors"
+              className="p-1.5 md:p-2 rounded-full hover:bg-glass-200 text-glass-text transition-colors shrink-0"
             >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              {theme === 'dark' ? <Sun size={18} className="md:w-5 md:h-5" /> : <Moon size={18} className="md:w-5 md:h-5" />}
             </button>
 
             {user ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
                 {!user.isPremium && (
                    <Button 
                     variant="primary" 
-                    className="hidden md:flex px-4 py-1.5 h-auto text-sm"
+                    className="hidden sm:flex px-3 py-1.5 h-8 text-xs md:text-sm"
                     onClick={() => setView('SUBSCRIPTION')}
                    >
                      Premium
                    </Button>
                 )}
+                {/* Mobile Premium Icon only */}
+                {!user.isPremium && (
+                   <button 
+                    onClick={() => setView('SUBSCRIPTION')}
+                    className="sm:hidden w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg"
+                   >
+                     <CreditCard size={14} />
+                   </button>
+                )}
+
                 <div className="relative group">
-                  <button className="flex items-center gap-2 hover:bg-glass-200 px-3 py-1.5 rounded-full transition-all border border-transparent hover:border-glass-border">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                  <button className="flex items-center gap-2 hover:bg-glass-200 px-2 py-1 md:px-3 md:py-1.5 rounded-full transition-all border border-transparent hover:border-glass-border">
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
                       {user.name.charAt(0)}
                     </div>
                   </button>
@@ -71,11 +81,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <button onClick={() => toggleAuthModal(true)} className="text-sm font-medium hover:text-blue-400 transition-colors">
+                <button onClick={() => toggleAuthModal(true)} className="text-xs md:text-sm font-medium hover:text-blue-400 transition-colors whitespace-nowrap">
                   Connexion
                 </button>
-                <Button onClick={() => toggleAuthModal(true)} className="px-4 py-1.5 h-auto text-sm">
-                  Essai Gratuit
+                <Button onClick={() => toggleAuthModal(true)} className="px-3 py-1.5 h-8 text-xs md:text-sm whitespace-nowrap">
+                  <span className="hidden sm:inline">Essai Gratuit</span>
+                  <span className="sm:hidden">Essai</span>
                 </Button>
               </div>
             )}
@@ -84,7 +95,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 relative">
+      <main className="flex-1 relative w-full max-w-[100vw] overflow-x-hidden">
         {children}
       </main>
 

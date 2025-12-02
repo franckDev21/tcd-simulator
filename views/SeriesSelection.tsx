@@ -31,21 +31,27 @@ export const SeriesSelection: React.FC<SeriesSelectionProps> = ({ onSelectSeries
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 animate-fade-in">
-      <div className="flex items-center gap-4 mb-8">
-        <Button variant="ghost" onClick={() => setView('DASHBOARD')}>
-          <ArrowLeft size={20} /> Retour
-        </Button>
-        <div className="flex-1 text-center">
-            <h1 className="text-3xl font-bold text-blue-400">
-                {activeModule} PRO
-            </h1>
-            <p className="text-slate-500 mt-1">Sélectionnez une série pour commencer l'entraînement</p>
+    <div className="max-w-6xl mx-auto p-4 md:p-6 animate-fade-in">
+      {/* Responsive Header */}
+      <div className="flex flex-col md:flex-row items-center gap-4 mb-8 relative">
+        <div className="w-full md:w-auto flex justify-start">
+          <Button variant="ghost" onClick={() => setView('DASHBOARD')} className="pl-0 md:pl-4">
+            <ArrowLeft size={20} className="mr-2" /> Retour
+          </Button>
         </div>
-        <div className="w-24"></div> {/* Spacer for center alignment */}
+        
+        <div className="flex-1 text-center">
+            <h1 className="text-2xl md:text-3xl font-bold text-blue-400 uppercase leading-tight">
+                {activeModule} <span className="text-glass-text">PRO</span>
+            </h1>
+            <p className="text-slate-500 mt-1 text-sm md:text-base">Sélectionnez une série pour commencer</p>
+        </div>
+        
+        {/* Spacer for Desktop Balance */}
+        <div className="hidden md:block w-24"></div> 
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {seriesList.map((id) => {
           const locked = isSeriesLocked(id);
           
@@ -54,7 +60,7 @@ export const SeriesSelection: React.FC<SeriesSelectionProps> = ({ onSelectSeries
               key={id}
               onClick={() => handleSeriesClick(id)}
               className={`
-                relative h-16 rounded-full flex items-center justify-center font-semibold text-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg
+                relative h-14 md:h-16 rounded-full flex items-center justify-center font-semibold text-base md:text-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg
                 ${locked 
                   ? 'bg-gray-600/40 text-gray-300 cursor-not-allowed border border-gray-600' 
                   : 'bg-blue-600 hover:bg-blue-500 text-white border border-blue-400 shadow-blue-500/30'
@@ -64,17 +70,17 @@ export const SeriesSelection: React.FC<SeriesSelectionProps> = ({ onSelectSeries
               <span className="mr-2">
                 {activeModule?.split(' ')[0]} Série {id}
               </span>
-              {locked ? <Lock size={18} className="opacity-70" /> : null}
+              {locked ? <Lock size={16} className="opacity-70" /> : null}
             </button>
           );
         })}
       </div>
 
       {!user?.isPremium && (
-          <div className="mt-12 p-6 rounded-2xl bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-blue-500/30 text-center">
-              <h3 className="text-xl font-bold text-white mb-2">Débloquez les 50+ Séries</h3>
-              <p className="text-slate-300 mb-6">Accédez à l'intégralité des examens blancs et maximisez votre score.</p>
-              <Button onClick={() => setView('SUBSCRIPTION')} className="px-8">Passer Premium</Button>
+          <div className="mt-8 md:mt-12 p-6 rounded-2xl bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-blue-500/30 text-center">
+              <h3 className="text-lg md:text-xl font-bold text-white mb-2">Débloquez les 50+ Séries</h3>
+              <p className="text-slate-300 mb-6 text-sm md:text-base">Accédez à l'intégralité des examens blancs et maximisez votre score.</p>
+              <Button onClick={() => setView('SUBSCRIPTION')} className="w-full md:w-auto px-8">Passer Premium</Button>
           </div>
       )}
     </div>

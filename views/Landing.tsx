@@ -15,7 +15,7 @@ export const Landing: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col w-full animate-fade-in">
+    <div className="flex flex-col w-full animate-fade-in overflow-hidden">
       {/* Hero Section */}
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative overflow-hidden min-h-[90vh]">
         {/* Decorative Blobs */}
@@ -29,12 +29,12 @@ export const Landing: React.FC = () => {
             Simulateur TCF Canada v2.0
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-glass-text leading-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-glass-text leading-tight">
             Maîtrisez votre destin.<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Réussissez le TCF.</span>
           </h1>
           
-          <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
             La plateforme de référence pour s'entraîner au Test de Connaissance du Français. 
             Simulations réalistes, corrections par IA et suivi de progression détaillé.
           </p>
@@ -68,7 +68,7 @@ export const Landing: React.FC = () => {
       {/* --- REDESIGNED: How it Works (Flow Layout) --- */}
       <div className="py-24 px-6 max-w-7xl mx-auto w-full">
         <div className="text-center mb-20">
-          <h2 className="text-4xl font-bold text-glass-text mb-4">La route vers le C2</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-glass-text mb-4">La route vers le C2</h2>
           <p className="text-slate-500 max-w-2xl mx-auto">Une méthode simple, efficace et éprouvée pour maximiser votre score.</p>
         </div>
         
@@ -106,15 +106,15 @@ export const Landing: React.FC = () => {
       <div className="py-24 px-6 bg-glass-100/20">
         <div className="max-w-7xl mx-auto w-full">
           <div className="mb-16 md:text-center max-w-3xl mx-auto">
-            <h2 className="text-4xl font-bold text-glass-text mb-6">Tout pour réussir le TCF</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-glass-text mb-6">Tout pour réussir le TCF</h2>
             <p className="text-slate-500 text-lg">Une suite d'outils complète conçue spécifiquement pour les exigences de l'immigration canadienne.</p>
           </div>
           
           {/* Bento Grid Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[300px]">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:auto-rows-[300px]">
             
             {/* Large Card: Stats */}
-            <div className="md:col-span-8 p-8 rounded-3xl bg-gradient-to-br from-glass-100 to-glass-200 border border-glass-border relative overflow-hidden group hover:border-blue-500/30 transition-colors">
+            <div className="md:col-span-8 p-8 rounded-3xl bg-gradient-to-br from-glass-100 to-glass-200 border border-glass-border relative overflow-hidden group hover:border-blue-500/30 transition-colors min-h-[300px]">
               <div className="relative z-10 h-full flex flex-col justify-between">
                 <div>
                   <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 mb-4">
@@ -138,7 +138,7 @@ export const Landing: React.FC = () => {
             </div>
 
             {/* Tall Card: Mobile */}
-            <div className="md:col-span-4 row-span-2 p-8 rounded-3xl bg-glass-100 border border-glass-border relative overflow-hidden group">
+            <div className="md:col-span-4 md:row-span-2 p-8 rounded-3xl bg-glass-100 border border-glass-border relative overflow-hidden group min-h-[400px]">
                <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-[80px] pointer-events-none"></div>
                <div className="h-full flex flex-col">
                   <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 mb-6">
@@ -160,7 +160,7 @@ export const Landing: React.FC = () => {
             </div>
 
             {/* Medium Card: Timer */}
-            <div className="md:col-span-4 p-8 rounded-3xl bg-glass-100 border border-glass-border hover:bg-glass-200 transition-colors">
+            <div className="md:col-span-4 p-8 rounded-3xl bg-glass-100 border border-glass-border hover:bg-glass-200 transition-colors min-h-[200px]">
                <div className="flex items-start justify-between">
                   <div>
                     <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 mb-4">
@@ -176,7 +176,7 @@ export const Landing: React.FC = () => {
             </div>
 
             {/* Medium Card: AI */}
-            <div className="md:col-span-4 p-8 rounded-3xl bg-glass-100 border border-glass-border hover:bg-glass-200 transition-colors">
+            <div className="md:col-span-4 p-8 rounded-3xl bg-glass-100 border border-glass-border hover:bg-glass-200 transition-colors min-h-[200px]">
                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
                   <Laptop size={24} />
                </div>
@@ -194,7 +194,7 @@ export const Landing: React.FC = () => {
         
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-glass-text mb-4">Ils ont réussi, pourquoi pas vous ?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-glass-text mb-4">Ils ont réussi, pourquoi pas vous ?</h2>
             <div className="flex justify-center gap-1 text-amber-400 mb-2">
                <Star fill="currentColor" size={20} />
                <Star fill="currentColor" size={20} />
@@ -267,7 +267,7 @@ export const Landing: React.FC = () => {
       <div className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-glass-text mb-4">Des tarifs adaptés à vos besoins</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-glass-text mb-4">Des tarifs adaptés à vos besoins</h2>
             <p className="text-slate-500 text-lg">Investissez dans votre avenir pour le prix d'un café par semaine.</p>
           </div>
           
@@ -322,12 +322,12 @@ export const Landing: React.FC = () => {
 
       {/* Final CTA */}
       <div className="py-20 px-6">
-        <div className="max-w-5xl mx-auto relative rounded-3xl overflow-hidden p-12 text-center bg-gradient-to-r from-blue-900 to-indigo-900 border border-blue-500/30 shadow-2xl">
+        <div className="max-w-5xl mx-auto relative rounded-3xl overflow-hidden p-8 md:p-12 text-center bg-gradient-to-r from-blue-900 to-indigo-900 border border-blue-500/30 shadow-2xl">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
           <div className="relative z-10">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Prêt à obtenir votre score C2 ?</h2>
-            <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">Rejoignez plus de 10 000 candidats qui ont réussi leur immigration grâce à TCF Simulator.</p>
-            <Button onClick={handleStart} className="bg-white text-blue-900 hover:bg-blue-50 border-none text-lg px-8 py-4 h-auto shadow-xl mx-auto">
+            <h2 className="text-2xl md:text-5xl font-bold text-white mb-6">Prêt à obtenir votre score C2 ?</h2>
+            <p className="text-blue-100 text-base md:text-lg mb-8 max-w-2xl mx-auto">Rejoignez plus de 10 000 candidats qui ont réussi leur immigration grâce à TCF Simulator.</p>
+            <Button onClick={handleStart} className="w-full md:w-auto bg-white text-blue-900 hover:bg-blue-50 border-none text-lg px-8 py-4 h-auto shadow-xl mx-auto">
               Commencer l'entraînement maintenant
             </Button>
             <p className="mt-4 text-sm text-blue-200/60">Aucune carte bancaire requise pour l'inscription.</p>
