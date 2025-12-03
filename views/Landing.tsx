@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ArrowRight, CheckCircle, Shield, TrendingUp, Globe, Check, Star, Zap, UserCheck, HelpCircle, Laptop, Clock, BarChart3, Smartphone } from 'lucide-react';
 import { Button, GlassCard } from '../components/GlassUI';
@@ -26,7 +27,7 @@ export const Landing: React.FC = () => {
         <div className="max-w-4xl w-full text-center z-10 space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-glass-100 border border-glass-border backdrop-blur-md text-sm text-blue-400 font-medium animate-fade-in-up">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-            PRIMO v2.0
+            PRIMO • La référence du TCF Canada
           </div>
           
           <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-glass-text leading-tight">
