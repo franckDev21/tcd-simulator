@@ -49,23 +49,35 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     });
   };
   
-  // Real-time System Listener
+  // Real-time System Listener with robust mobile support (Legacy iOS/Android)
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     
-    const handleSystemChange = (e: MediaQueryListEvent) => {
+    const handleSystemChange = (e: MediaQueryListEvent | MediaQueryList) => {
       // Only follow system if user hasn't explicitly set a preference in localStorage
       if (!localStorage.getItem('ui-theme')) {
         setThemeState(e.matches ? 'dark' : 'light');
       }
     };
 
-    // Listen for changes
-    mediaQuery.addEventListener('change', handleSystemChange);
-    
-    return () => mediaQuery.removeEventListener('change', handleSystemChange);
+    // Modern browsers
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleSystemChange);
+    } 
+    // Fallback for older Safari/iOS (iOS < 14)
+    else if (mediaQuery.addListener) {
+      mediaQuery.addListener(handleSystemChange);
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handleSystemChange);
+      } else if (mediaQuery.removeListener) {
+        mediaQuery.removeListener(handleSystemChange);
+      }
+    };
   }, []);
 
   return (
