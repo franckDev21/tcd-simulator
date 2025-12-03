@@ -173,7 +173,7 @@ export const AllPlans: React.FC = () => {
       <div className="mt-16 text-center bg-glass-100 p-8 rounded-2xl border border-glass-border">
         <h3 className="text-xl font-bold mb-2">Besoin d'une offre pour votre école ou entreprise ?</h3>
         <p className="text-slate-500 mb-6">Nous proposons des tarifs de groupe et des tableaux de bord pour les enseignants.</p>
-        <Button variant="secondary">Contacter l'équipe commerciale</Button>
+        <Button variant="secondary" onClick={() => setView('CONTACT_SALES')}>Contacter l'équipe commerciale</Button>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import { SeriesSelection } from './views/SeriesSelection';
 import { ResultsView as Results } from './views/Results';
 import { Correction } from './views/Correction';
 import { AllPlans } from './views/AllPlans';
+import { ContactSales } from './views/ContactSales';
 import { MOCK_READING_QUESTIONS, MOCK_LISTENING_QUESTIONS, WRITING_PROMPTS } from './constants';
 import { useAppStore } from './store/useAppStore';
 import { ModuleType, Question } from './types';
@@ -63,6 +64,7 @@ const App = () => {
       case 'EDIT_PROFILE': return <EditProfile />;
       case 'SUBSCRIPTION': return <Subscription />;
       case 'ALL_PLANS': return <AllPlans />;
+      case 'CONTACT_SALES': return <ContactSales />;
       default: return <Landing />;
     }
   };
