@@ -11,6 +11,7 @@ import { AuthModal } from './components/AuthModal';
 import { SeriesSelection } from './views/SeriesSelection';
 import { ResultsView as Results } from './views/Results';
 import { Correction } from './views/Correction';
+import { AllPlans } from './views/AllPlans';
 import { MOCK_READING_QUESTIONS, MOCK_LISTENING_QUESTIONS, WRITING_PROMPTS } from './constants';
 import { useAppStore } from './store/useAppStore';
 import { ModuleType, Question } from './types';
@@ -61,6 +62,7 @@ const App = () => {
       case 'PROFILE': return <Profile />;
       case 'EDIT_PROFILE': return <EditProfile />;
       case 'SUBSCRIPTION': return <Subscription />;
+      case 'ALL_PLANS': return <AllPlans />;
       default: return <Landing />;
     }
   };

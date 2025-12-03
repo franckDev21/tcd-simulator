@@ -45,7 +45,7 @@ export interface UserResult {
   userAnswers?: Record<number, any>;
 }
 
-export type ViewState = 'LANDING' | 'DASHBOARD' | 'PROFILE' | 'EDIT_PROFILE' | 'SUBSCRIPTION' | 'EXAM_RUNNER' | 'RESULTS' | 'SERIES_SELECTION' | 'CORRECTION';
+export type ViewState = 'LANDING' | 'DASHBOARD' | 'PROFILE' | 'EDIT_PROFILE' | 'SUBSCRIPTION' | 'EXAM_RUNNER' | 'RESULTS' | 'SERIES_SELECTION' | 'CORRECTION' | 'ALL_PLANS';
 
 export interface CorrectionResult {
   score: number;

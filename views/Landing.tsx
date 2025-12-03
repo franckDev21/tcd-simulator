@@ -1,7 +1,6 @@
-
 import React from 'react';
-import { ArrowRight, CheckCircle, Shield, TrendingUp, Globe, Check, Star, Zap, UserCheck, HelpCircle, Laptop, Clock, BarChart3, Smartphone } from 'lucide-react';
-import { Button, GlassCard } from '../components/GlassUI';
+import { ArrowRight, Check, Star, Zap, UserCheck, HelpCircle, Laptop, Clock, BarChart3, Smartphone, ChevronRight, TrendingUp } from 'lucide-react';
+import { Button } from '../components/GlassUI';
 import { useAppStore } from '../store/useAppStore';
 
 export const Landing: React.FC = () => {
@@ -13,6 +12,10 @@ export const Landing: React.FC = () => {
 
   const handlePricing = () => {
     setView('SUBSCRIPTION');
+  };
+
+  const handleViewAllPlans = () => {
+    setView('ALL_PLANS');
   };
 
   return (
@@ -286,6 +289,7 @@ export const Landing: React.FC = () => {
             <p className="text-slate-500 text-lg">Investissez dans votre avenir pour le prix d'un café par semaine.</p>
           </div>
           
+          {/* Featured Cards */}
           <div className="grid md:grid-cols-3 gap-8 items-center">
              <PricingCard 
                title="Découverte" 
@@ -313,6 +317,18 @@ export const Landing: React.FC = () => {
                onClick={handlePricing}
              />
           </div>
+
+          {/* New Link to All Plans */}
+          <div className="mt-12 text-center">
+            <button 
+              onClick={handleViewAllPlans}
+              className="group inline-flex items-center gap-2 text-blue-400 font-medium hover:text-blue-300 transition-colors px-6 py-3 rounded-full hover:bg-glass-100 border border-transparent hover:border-glass-border"
+            >
+              <span>Voir toutes nos offres d'abonnement adaptées à votre rythme</span>
+              <ChevronRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+
         </div>
       </div>
 
