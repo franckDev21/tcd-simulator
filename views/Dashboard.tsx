@@ -31,7 +31,7 @@ export const Dashboard: React.FC<DashboardProps> = () => {
           <p className="text-slate-400">Prêt pour votre prochaine simulation ?</p>
         </div>
         <div className="flex gap-2">
-          <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2">
+          <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 animate-scale-in">
             <Award size={16} /> Premium
           </div>
         </div>
@@ -42,7 +42,7 @@ export const Dashboard: React.FC<DashboardProps> = () => {
         
         {/* Chart Section */}
         <div className="lg:col-span-2 space-y-6">
-          <GlassCard>
+          <GlassCard className="animate-fade-in-up" style={{ animationDelay: '0ms' }}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <TrendingUp size={20} /> Performance Globale
@@ -57,46 +57,58 @@ export const Dashboard: React.FC<DashboardProps> = () => {
 
           {/* Module Selection */}
           <div className="grid md:grid-cols-2 gap-4">
-            <ModuleCard 
-              title="Compréhension Écrite" 
-              icon={FileText} 
-              color="text-blue-400" 
-              bg="bg-blue-500/10" 
-              onClick={() => handleModuleClick(ModuleType.READING)} 
-            />
-            <ModuleCard 
-              title="Compréhension Orale" 
-              icon={Headphones} 
-              color="text-purple-400" 
-              bg="bg-purple-500/10" 
-              onClick={() => handleModuleClick(ModuleType.LISTENING)} 
-            />
-            <ModuleCard 
-              title="Expression Écrite" 
-              icon={EditIcon} 
-              color="text-emerald-400" 
-              bg="bg-emerald-500/10" 
-              onClick={() => handleModuleClick(ModuleType.WRITING)} 
-            />
-            <ModuleCard 
-              title="Expression Orale" 
-              icon={Mic} 
-              color="text-rose-400" 
-              bg="bg-rose-500/10" 
-              onClick={() => handleModuleClick(ModuleType.SPEAKING)} 
-            />
+            <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '100ms' }}>
+              <ModuleCard 
+                title="Compréhension Écrite" 
+                icon={FileText} 
+                color="text-blue-400" 
+                bg="bg-blue-500/10" 
+                onClick={() => handleModuleClick(ModuleType.READING)} 
+              />
+            </div>
+            <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '150ms' }}>
+              <ModuleCard 
+                title="Compréhension Orale" 
+                icon={Headphones} 
+                color="text-purple-400" 
+                bg="bg-purple-500/10" 
+                onClick={() => handleModuleClick(ModuleType.LISTENING)} 
+              />
+            </div>
+            <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '200ms' }}>
+              <ModuleCard 
+                title="Expression Écrite" 
+                icon={EditIcon} 
+                color="text-emerald-400" 
+                bg="bg-emerald-500/10" 
+                onClick={() => handleModuleClick(ModuleType.WRITING)} 
+              />
+            </div>
+            <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '250ms' }}>
+              <ModuleCard 
+                title="Expression Orale" 
+                icon={Mic} 
+                color="text-rose-400" 
+                bg="bg-rose-500/10" 
+                onClick={() => handleModuleClick(ModuleType.SPEAKING)} 
+              />
+            </div>
           </div>
         </div>
 
         {/* Sidebar / History */}
         <div className="space-y-6">
-          <GlassCard className="h-full">
+          <GlassCard className="h-full animate-fade-in-up" style={{ animationDelay: '300ms' }}>
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Clock size={18} /> Activité Récente
             </h3>
             <div className="space-y-4">
               {MOCK_HISTORY.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition cursor-pointer group">
+                <div 
+                  key={idx} 
+                  className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition cursor-pointer group animate-fade-in-up opacity-0"
+                  style={{ animationDelay: `${400 + (idx * 100)}ms` }}
+                >
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getModuleColor(item.module)}`}>
                       <span className="font-bold text-sm">{item.level}</span>
@@ -135,7 +147,7 @@ const getModuleColor = (mod: ModuleType) => {
 };
 
 const ModuleCard = ({ title, icon: Icon, color, bg, onClick }: any) => (
-  <button onClick={onClick} className="flex items-center gap-4 p-4 rounded-2xl bg-glass-100 hover:bg-glass-200 border border-glass-border transition-all text-left group">
+  <button onClick={onClick} className="w-full flex items-center gap-4 p-4 rounded-2xl bg-glass-100 hover:bg-glass-200 border border-glass-border transition-all text-left group transform hover:-translate-y-1 duration-300 hover:shadow-lg">
     <div className={`w-12 h-12 rounded-xl ${bg} ${color} flex items-center justify-center transition-transform group-hover:scale-110`}>
       <Icon size={24} />
     </div>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ArrowLeft, Check, Zap, Crown, Clock, Calendar, Users } from 'lucide-react';
 import { Button } from '../components/GlassUI';
@@ -12,18 +11,21 @@ export const AllPlans: React.FC = () => {
     setView('SUBSCRIPTION');
   };
 
-  const PlanCard = ({ title, price, period, icon: Icon, features, type, color }: any) => {
+  const PlanCard = ({ title, price, period, icon: Icon, features, type, color, delay }: any) => {
     const isPremium = type === 'premium';
     const isValue = type === 'value';
 
     return (
-      <div className={`
-        relative overflow-hidden rounded-3xl p-8 border transition-all duration-300 group hover:-translate-y-2
-        ${isPremium 
-          ? 'bg-gradient-to-b from-white to-indigo-50 dark:from-slate-900 dark:to-black border-blue-500 shadow-2xl shadow-blue-500/20' 
-          : 'bg-glass-100 border-glass-border hover:bg-glass-200'}
-        ${isValue ? 'ring-2 ring-amber-400/50' : ''}
-      `}>
+      <div 
+        className={`
+          relative overflow-hidden rounded-3xl p-8 border transition-all duration-300 group hover:-translate-y-2 animate-fade-in-up opacity-0
+          ${isPremium 
+            ? 'bg-gradient-to-b from-white to-indigo-50 dark:from-slate-900 dark:to-black border-blue-500 shadow-2xl shadow-blue-500/20' 
+            : 'bg-glass-100 border-glass-border hover:bg-glass-200'}
+          ${isValue ? 'ring-2 ring-amber-400/50' : ''}
+        `}
+        style={{ animationDelay: `${delay}ms` }}
+      >
         {isValue && (
           <div className="absolute top-4 right-4 bg-amber-400 text-black text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
             Meilleur choix
@@ -73,8 +75,8 @@ export const AllPlans: React.FC = () => {
           <ArrowLeft size={20} className="mr-2" /> Retour
         </Button>
         <div className="flex-1 text-center md:text-left mt-12 md:mt-0">
-          <h1 className="text-4xl font-bold text-glass-text mb-2">Nos Formules d'Abonnement</h1>
-          <p className="text-slate-500 text-lg">Choisissez la flexibilité qui vous convient pour réussir votre TCF Canada.</p>
+          <h1 className="text-4xl font-bold text-glass-text mb-2 animate-fade-in-up">Nos Formules d'Abonnement</h1>
+          <p className="text-slate-500 text-lg animate-fade-in-up" style={{ animationDelay: '100ms' }}>Choisissez la flexibilité qui vous convient pour réussir votre TCF Canada.</p>
         </div>
       </div>
 
@@ -88,6 +90,7 @@ export const AllPlans: React.FC = () => {
           period="/ jour"
           icon={Clock}
           color="bg-slate-500/20"
+          delay={200}
           features={[
             "Accès complet pendant 24h",
             "Idéal pour un test blanc rapide",
@@ -101,6 +104,7 @@ export const AllPlans: React.FC = () => {
           period="/ 48h"
           icon={Calendar}
           color="bg-orange-500/20"
+          delay={300}
           features={[
             "Valable du Vendredi au Dimanche",
             "Mode intensif débloqué",
@@ -115,6 +119,7 @@ export const AllPlans: React.FC = () => {
           period="/ semaine"
           icon={Zap}
           color="bg-blue-500/20"
+          delay={400}
           features={[
             "La formule la plus populaire",
             "Accès illimité 7 jours",
@@ -130,6 +135,7 @@ export const AllPlans: React.FC = () => {
           icon={Crown}
           color="bg-purple-500/20"
           type="value"
+          delay={500}
           features={[
             "Tout le pack Hebdo",
             "Économisez 60% par rapport à l'hebdo",
@@ -144,6 +150,7 @@ export const AllPlans: React.FC = () => {
           period="/ 3 mois"
           icon={Users}
           color="bg-emerald-500/20"
+          delay={600}
           features={[
             "Idéal pour une préparation longue",
             "Accès complet pendant 90 jours",
@@ -159,6 +166,7 @@ export const AllPlans: React.FC = () => {
           icon={Crown}
           type="premium"
           color="bg-indigo-500/20"
+          delay={700}
           features={[
             "L'expérience ultime",
             "Accès illimité pendant 1 an",
@@ -170,7 +178,7 @@ export const AllPlans: React.FC = () => {
 
       </div>
 
-      <div className="mt-16 text-center bg-glass-100 p-8 rounded-2xl border border-glass-border">
+      <div className="mt-16 text-center bg-glass-100 p-8 rounded-2xl border border-glass-border animate-fade-in-up" style={{ animationDelay: '800ms' }}>
         <h3 className="text-xl font-bold mb-2">Besoin d'une offre pour votre école ou entreprise ?</h3>
         <p className="text-slate-500 mb-6">Nous proposons des tarifs de groupe et des tableaux de bord pour les enseignants.</p>
         <Button variant="secondary" onClick={() => setView('CONTACT_SALES')}>Contacter l'équipe commerciale</Button>
