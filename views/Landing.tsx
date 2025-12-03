@@ -31,8 +31,8 @@ export const Landing: React.FC = () => {
           </div>
           
           <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-glass-text leading-tight">
-            Maîtrisez votre destin.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Réussissez le TCF.</span>
+            Le test de langue TCF <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">réinventé pour l'excellence.</span>
           </h1>
           
           <p className="text-base md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
@@ -66,7 +66,7 @@ export const Landing: React.FC = () => {
         </div>
       </div>
 
-      {/* --- REDESIGNED: How it Works (Flow Layout) --- */}
+      {/* --- How it Works (Flow Layout) --- */}
       <div className="py-24 px-6 max-w-7xl mx-auto w-full">
         <div className="text-center mb-20">
           <h2 className="text-3xl md:text-4xl font-bold text-glass-text mb-4">La route vers le C2</h2>
@@ -103,7 +103,7 @@ export const Landing: React.FC = () => {
         </div>
       </div>
 
-      {/* --- REDESIGNED: Features (Bento Grid) --- */}
+      {/* --- Features (Bento Grid) --- */}
       <div className="py-24 px-6 bg-glass-100/20">
         <div className="max-w-7xl mx-auto w-full">
           <div className="mb-16 md:text-center max-w-3xl mx-auto">
@@ -148,13 +148,27 @@ export const Landing: React.FC = () => {
                   <h3 className="text-2xl font-bold text-glass-text mb-4">100% Mobile Friendly</h3>
                   <p className="text-slate-400 mb-8">Révisez dans les transports, au café ou au lit. L'interface s'adapte parfaitement à votre écran.</p>
                   
-                  {/* Phone Mockup */}
-                  <div className="flex-1 bg-black/40 rounded-t-3xl border-t-4 border-x-4 border-glass-border p-4 relative top-4 group-hover:top-0 transition-all duration-500">
-                     <div className="w-1/3 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
+                  {/* Phone Mockup - ADAPTIVE THEME */}
+                  <div className="flex-1 rounded-t-3xl border-t-4 border-x-4 p-4 relative top-4 group-hover:top-0 transition-all duration-500 shadow-2xl 
+                    bg-white border-slate-200 shadow-slate-200
+                    dark:bg-black/40 dark:border-glass-border dark:shadow-none"
+                  >
+                     {/* Notch */}
+                     <div className="w-1/3 h-1 rounded-full mx-auto mb-4 
+                        bg-slate-300 dark:bg-white/20"
+                     ></div>
+                     
+                     {/* Content Placeholders */}
                      <div className="space-y-3">
-                        <div className="h-16 bg-white/5 rounded-xl w-full"></div>
-                        <div className="h-16 bg-white/5 rounded-xl w-full"></div>
-                        <div className="h-16 bg-white/5 rounded-xl w-full"></div>
+                        <div className="h-16 rounded-xl w-full 
+                          bg-slate-100 dark:bg-white/5"
+                        ></div>
+                        <div className="h-16 rounded-xl w-full 
+                          bg-slate-100 dark:bg-white/5"
+                        ></div>
+                        <div className="h-16 rounded-xl w-full 
+                          bg-slate-100 dark:bg-white/5"
+                        ></div>
                      </div>
                   </div>
                </div>
@@ -189,7 +203,7 @@ export const Landing: React.FC = () => {
         </div>
       </div>
 
-      {/* --- REDESIGNED: Testimonials (Staggered Layout) --- */}
+      {/* --- Testimonials (Staggered Layout) --- */}
       <div className="py-24 px-6 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
         
