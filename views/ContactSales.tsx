@@ -56,23 +56,23 @@ export const ContactSales: React.FC = () => {
             </p>
           </div>
 
-          <GlassCard className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 border-blue-500/20">
-            <h3 className="font-bold text-white mb-4">Pourquoi PRIMO Business ?</h3>
-            <ul className="space-y-3 text-sm text-slate-300">
+          <GlassCard className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/40 dark:to-indigo-900/40 border-blue-500/20 transition-colors duration-300">
+            <h3 className="font-bold text-slate-800 dark:text-white mb-4">Pourquoi PRIMO Business ?</h3>
+            <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
               <li className="flex gap-3">
-                <CheckCircle size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                <CheckCircle size={16} className="text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
                 <span>Suivi centralisé des élèves</span>
               </li>
               <li className="flex gap-3">
-                <CheckCircle size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                <CheckCircle size={16} className="text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
                 <span>Tarifs dégressifs (jusqu'à -40%)</span>
               </li>
               <li className="flex gap-3">
-                <CheckCircle size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                <CheckCircle size={16} className="text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
                 <span>Facturation unifiée</span>
               </li>
               <li className="flex gap-3">
-                <CheckCircle size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                <CheckCircle size={16} className="text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
                 <span>Marque blanche (Optionnel)</span>
               </li>
             </ul>
@@ -88,14 +88,14 @@ export const ContactSales: React.FC = () => {
                   <label className="block text-xs font-medium text-slate-500 mb-1">Nom du contact</label>
                   <div className="relative">
                     <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input required type="text" className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" placeholder="Jean Dupont" />
+                    <input required type="text" className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all text-glass-text placeholder-slate-400" placeholder="Jean Dupont" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Nom de l'organisation</label>
                   <div className="relative">
                     <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input required type="text" className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" placeholder="École..." />
+                    <input required type="text" className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all text-glass-text placeholder-slate-400" placeholder="École..." />
                   </div>
                 </div>
               </div>
@@ -105,14 +105,14 @@ export const ContactSales: React.FC = () => {
                   <label className="block text-xs font-medium text-slate-500 mb-1">Email professionnel</label>
                   <div className="relative">
                     <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input required type="email" className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" placeholder="contact@ecole.com" />
+                    <input required type="email" className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all text-glass-text placeholder-slate-400" placeholder="contact@ecole.com" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Téléphone</label>
                   <div className="relative">
                     <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input required type="tel" className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all" placeholder="+237..." />
+                    <input required type="tel" className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all text-glass-text placeholder-slate-400" placeholder="+237..." />
                   </div>
                 </div>
               </div>
@@ -133,7 +133,7 @@ export const ContactSales: React.FC = () => {
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1">Message ou besoins spécifiques</label>
                 <textarea 
-                  className="w-full bg-glass-200 border border-glass-border rounded-xl p-4 text-sm outline-none focus:border-blue-500 transition-all min-h-[120px]"
+                  className="w-full bg-glass-200 border border-glass-border rounded-xl p-4 text-sm outline-none focus:border-blue-500 transition-all min-h-[120px] text-glass-text placeholder-slate-400"
                   placeholder="Bonjour, je souhaiterais obtenir un devis pour..."
                 ></textarea>
               </div>
