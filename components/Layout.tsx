@@ -2,6 +2,7 @@ import React from 'react';
 import { Sun, Moon, User as UserIcon, LogOut, CreditCard } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { Button } from './GlassUI';
+import { ChatWidget } from './ChatWidget';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, theme, toggleTheme, setView, logout, toggleAuthModal } = useAppStore();
@@ -129,6 +130,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           © 2024 PRIMO. Tous droits réservés.
         </div>
       </footer>
+
+      {/* Global Chat Widget */}
+      <ChatWidget />
     </div>
   );
 };
