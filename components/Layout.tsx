@@ -3,9 +3,11 @@ import { Sun, Moon, User as UserIcon, LogOut, CreditCard } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { Button } from './GlassUI';
 import { ChatWidget } from './ChatWidget';
+import { useTheme } from '../hooks/useTheme';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, theme, toggleTheme, setView, logout, toggleAuthModal } = useAppStore();
+  const { user, setView, logout, toggleAuthModal } = useAppStore();
+  const { theme, toggleTheme } = useTheme();
 
   const handleLogoClick = () => {
     if (user) setView('DASHBOARD');
@@ -33,6 +35,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <button 
               onClick={toggleTheme}
               className="p-1.5 md:p-2 rounded-full hover:bg-glass-200 text-glass-text transition-colors shrink-0"
+              aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun size={18} className="md:w-5 md:h-5" /> : <Moon size={18} className="md:w-5 md:h-5" />}
             </button>

@@ -5,7 +5,6 @@ import { ViewState, User, ModuleType } from '../types';
 interface AppState {
   // UI State
   view: ViewState;
-  theme: 'dark' | 'light';
   isAuthModalOpen: boolean;
   
   // User State
@@ -16,7 +15,6 @@ interface AppState {
 
   // Actions
   setView: (view: ViewState) => void;
-  toggleTheme: () => void;
   toggleAuthModal: (isOpen: boolean) => void;
   login: (user: User) => void;
   logout: () => void;
@@ -31,27 +29,12 @@ export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       view: 'LANDING',
-      // Default to system preference if window is available, otherwise light
-      theme: (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light',
       isAuthModalOpen: false,
       user: null,
       activeModule: null,
 
       setView: (view) => set({ view }),
       
-      toggleTheme: () => set((state) => {
-        const newTheme = state.theme === 'dark' ? 'light' : 'dark';
-        // Update HTML class for Tailwind
-        if (newTheme === 'dark') {
-          document.documentElement.classList.add('dark');
-          document.documentElement.classList.remove('light');
-        } else {
-          document.documentElement.classList.remove('dark');
-          document.documentElement.classList.add('light');
-        }
-        return { theme: newTheme };
-      }),
-
       toggleAuthModal: (isOpen) => set({ isAuthModalOpen: isOpen }),
 
       login: (user) => set({ user, isAuthModalOpen: false, view: 'DASHBOARD' }),
@@ -60,7 +43,7 @@ export const useAppStore = create<AppState>()(
 
       updateUser: (updatedData) => set((state) => ({
         user: state.user ? { ...state.user, ...updatedData } : null,
-        view: 'PROFILE' // Return to profile after update
+        view: 'PROFILE'
       })),
 
       openSeriesSelection: (module) => set({ activeModule: module, view: 'SERIES_SELECTION' }),
@@ -75,8 +58,8 @@ export const useAppStore = create<AppState>()(
       }))
     }),
     {
-      name: 'tcf-storage', // unique name for localStorage
-      partialize: (state) => ({ user: state.user, theme: state.theme }), // Only persist user and theme
+      name: 'tcf-storage', 
+      partialize: (state) => ({ user: state.user }), 
     }
   )
 );

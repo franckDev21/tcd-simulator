@@ -4,20 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script>
-      // Immediate Theme Detection to prevent FOUC (Flash of Unstyled Content)
+      // Immediate Theme Detection to prevent FOUC
       (function() {
         try {
-          const savedState = localStorage.getItem('tcf-storage');
-          let theme = 'light'; // Fallback default
+          // 1. Check User Preference (Explicit)
+          const savedTheme = localStorage.getItem('ui-theme');
+          let theme = 'light';
 
-          // 1. Check LocalStorage (User preference overrides system)
-          if (savedState) {
-            const parsed = JSON.parse(savedState);
-            if (parsed.state && parsed.state.theme) {
-              theme = parsed.state.theme;
-            }
+          if (savedTheme === 'dark' || savedTheme === 'light') {
+            theme = savedTheme;
           } 
-          // 2. Check System Preference
+          // 2. Check System Preference (Implicit)
           else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             theme = 'dark';
           }

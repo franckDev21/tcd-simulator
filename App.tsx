@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Landing } from './views/Landing';
 import { Dashboard } from './views/Dashboard';
@@ -16,8 +15,9 @@ import { ContactSales } from './views/ContactSales';
 import { MOCK_READING_QUESTIONS, MOCK_LISTENING_QUESTIONS, WRITING_PROMPTS } from './constants';
 import { useAppStore } from './store/useAppStore';
 import { ModuleType, Question } from './types';
+import { ThemeProvider } from './context/ThemeContext';
 
-const App = () => {
+const AppContent = () => {
   const { view, activeModule, isAuthModalOpen, startExam } = useAppStore();
   const [currentQuestions, setCurrentQuestions] = useState<Question[]>([]);
 
@@ -26,7 +26,7 @@ const App = () => {
      let baseQuestions: Question[] = [];
      if (mod === ModuleType.READING) baseQuestions = MOCK_READING_QUESTIONS;
      else if (mod === ModuleType.LISTENING) baseQuestions = MOCK_LISTENING_QUESTIONS;
-     else return WRITING_PROMPTS; // Writing doesn't use 39 q series in this context usually, but keeping logic safe
+     else return WRITING_PROMPTS; 
 
      // Generate 39 questions by cycling through mock data
      const fullSeries: Question[] = [];
@@ -74,6 +74,14 @@ const App = () => {
       {renderView()}
       {isAuthModalOpen && <AuthModal />}
     </Layout>
+  );
+};
+
+const App = () => {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 };
 
