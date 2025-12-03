@@ -65,12 +65,11 @@ export const ChatWidget: React.FC = () => {
         {/* Chat Window - Floating Bubble Style for All Screens */}
         <div 
           className={`
-            pointer-events-auto
             mb-4 origin-bottom-right transition-all duration-300 ease-out
             bg-glass-100 backdrop-blur-xl border border-glass-border shadow-2xl rounded-2xl
             flex flex-col overflow-hidden
             ${isOpen 
-              ? 'opacity-100 scale-100 translate-y-0' 
+              ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' 
               : 'opacity-0 scale-90 translate-y-8 pointer-events-none'
             }
             /* Dimensions */
