@@ -1,8 +1,40 @@
 <!DOCTYPE html>
-<html lang="fr" class="light">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      // Immediate Theme Detection to prevent FOUC (Flash of Unstyled Content)
+      (function() {
+        try {
+          const savedState = localStorage.getItem('tcf-storage');
+          let theme = 'light'; // Fallback default
+
+          // 1. Check LocalStorage (User preference overrides system)
+          if (savedState) {
+            const parsed = JSON.parse(savedState);
+            if (parsed.state && parsed.state.theme) {
+              theme = parsed.state.theme;
+            }
+          } 
+          // 2. Check System Preference
+          else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            theme = 'dark';
+          }
+
+          // 3. Apply Theme
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+          } else {
+            document.documentElement.classList.add('light');
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {
+          console.error('Theme detection failed:', e);
+        }
+      })();
+    </script>
     <title>PRIMO</title>
     <meta name="application-name" content="PRIMO">
     <meta property="og:site_name" content="PRIMO">

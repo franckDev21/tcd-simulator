@@ -31,7 +31,8 @@ export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       view: 'LANDING',
-      theme: 'light',
+      // Default to system preference if window is available, otherwise light
+      theme: (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light',
       isAuthModalOpen: false,
       user: null,
       activeModule: null,
