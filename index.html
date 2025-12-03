@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#FFFFFF" />
     <script>
       // Immediate Theme Detection to prevent FOUC
       (function() {
@@ -19,13 +20,21 @@
             theme = 'dark';
           }
 
+          // Helper to update mobile browser address bar color
+          const updateMetaTheme = (isDark) => {
+             const meta = document.querySelector('meta[name="theme-color"]');
+             if (meta) meta.setAttribute('content', isDark ? '#0f172a' : '#FFFFFF');
+          };
+
           // 3. Apply Theme
           if (theme === 'dark') {
             document.documentElement.classList.add('dark');
             document.documentElement.classList.remove('light');
+            updateMetaTheme(true);
           } else {
             document.documentElement.classList.add('light');
             document.documentElement.classList.remove('dark');
+            updateMetaTheme(false);
           }
         } catch (e) {
           console.error('Theme detection failed:', e);

@@ -30,11 +30,17 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return 'light'; // Default fallback
   });
 
-  // Apply theme to HTML element
+  // Apply theme to HTML element and Browser UI (Meta Tag)
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
+    
+    // Update Mobile Browser Address Bar Color
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', theme === 'dark' ? '#0f172a' : '#FFFFFF');
+    }
     
     // IMPORTANT: We do NOT save to localStorage here.
     // Saving here would lock the theme on the first load, preventing
