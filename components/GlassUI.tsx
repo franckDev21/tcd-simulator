@@ -37,13 +37,14 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
 }
 
-export const Button: React.FC<ButtonProps> = ({ 
-  children, 
-  variant = 'primary', 
-  className = "", 
+export const Button: React.FC<ButtonProps> = ({
+  children,
+  variant = 'primary',
+  className = "",
   icon: Icon,
   loading,
-  ...props 
+  type = 'button',
+  ...props
 }) => {
   const baseStyles = "relative flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed";
   
@@ -55,7 +56,7 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   return (
-    <button className={`${baseStyles} ${variants[variant]} ${className}`} {...props}>
+    <button type={type} className={`${baseStyles} ${variants[variant]} ${className}`} {...props}>
       {loading ? (
         <svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
