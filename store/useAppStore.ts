@@ -17,6 +17,7 @@ interface AppState {
   // Exam State
   activeModule: ModuleType | null;
   activeSeriesId: number | null;
+  activeAttemptId: number | null;
 
   // Actions
   setView: (view: ViewState) => void;
@@ -31,6 +32,7 @@ interface AppState {
   upgradeUser: () => void;
   showCheckEmail: (email: string) => void;
   clearPendingEmail: () => void;
+  viewAttemptDetail: (attemptId: number) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -42,6 +44,7 @@ export const useAppStore = create<AppState>()(
       pendingVerificationEmail: null,
       activeModule: null,
       activeSeriesId: null,
+      activeAttemptId: null,
 
       setView: (view) => set({ view }),
 
@@ -52,7 +55,7 @@ export const useAppStore = create<AppState>()(
       logout: () => {
         tokenStorage.remove();
         localStorage.removeItem('auth-storage');
-        set({ user: null, view: 'LANDING', activeModule: null, activeSeriesId: null, pendingVerificationEmail: null });
+        set({ user: null, view: 'LANDING', activeModule: null, activeSeriesId: null, activeAttemptId: null, pendingVerificationEmail: null });
       },
 
       updateUser: (updatedData) => set((state) => ({
@@ -76,6 +79,8 @@ export const useAppStore = create<AppState>()(
       showCheckEmail: (email) => set({ pendingVerificationEmail: email, view: 'CHECK_EMAIL', isAuthModalOpen: false }),
 
       clearPendingEmail: () => set({ pendingVerificationEmail: null, view: 'LANDING' }),
+
+      viewAttemptDetail: (attemptId) => set({ activeAttemptId: attemptId, view: 'ATTEMPT_DETAIL' }),
     }),
     {
       name: 'tcf-storage',

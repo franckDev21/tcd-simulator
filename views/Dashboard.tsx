@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FileText, Mic, Headphones, Clock, Award, TrendingUp, Loader2, History } from 'lucide-react';
+import { FileText, Mic, Headphones, Clock, Award, TrendingUp, Loader2, History, ChevronRight } from 'lucide-react';
 import { GlassCard, Button } from '../components/GlassUI';
 import { ScoreHistoryChart } from '../components/Charts';
 import { ModuleType } from '../types';
@@ -24,7 +24,7 @@ const getModuleTypeFromCode = (code: string): ModuleType => {
 };
 
 export const Dashboard: React.FC<DashboardProps> = () => {
-  const { openSeriesSelection, startExam, setView } = useAppStore();
+  const { openSeriesSelection, startExam, setView, viewAttemptDetail } = useAppStore();
   const { user } = useAuthStore();
   const [recentHistory, setRecentHistory] = useState<UserExamHistory[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
@@ -188,13 +188,14 @@ export const Dashboard: React.FC<DashboardProps> = () => {
                 <p className="text-xs mt-1">Commencez votre première simulation !</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {recentHistory.map((item, idx) => {
                   const moduleType = getModuleTypeFromCode(item.module_type);
                   return (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition cursor-pointer group animate-fade-in-up opacity-0"
+                      onClick={() => viewAttemptDetail(item.id)}
+                      className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition cursor-pointer group animate-fade-in-up opacity-0 hover:scale-[1.02] transform duration-200"
                       style={{ animationDelay: `${400 + (idx * 100)}ms` }}
                     >
                       <div className="flex items-center gap-3">
@@ -203,12 +204,16 @@ export const Dashboard: React.FC<DashboardProps> = () => {
                         </div>
                         <div>
                           <div className="text-sm font-medium">{moduleType}</div>
+                          <div className="text-[10px] text-blue-400/70 font-medium">{item.exam_title}</div>
                           <div className="text-xs text-slate-500">{formatDate(item.completed_at)}</div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-bold">{item.score}</div>
-                        <div className="text-xs text-slate-500">/ {item.max_score}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          <div className="font-bold">{item.score}</div>
+                          <div className="text-xs text-slate-500">/ {item.max_score}</div>
+                        </div>
+                        <ChevronRight size={16} className="text-slate-500 opacity-0 group-hover:opacity-100 transition" />
                       </div>
                     </div>
                   );

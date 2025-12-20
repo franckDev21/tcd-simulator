@@ -455,16 +455,39 @@ export const ExamRunner: React.FC = () => {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 py-12">
-                        <div className="bg-glass-200 p-6 rounded-2xl border border-glass-border max-w-lg">
-                            <h3 className="text-lg font-medium mb-2">{currentQ.text}</h3>
-                            <p className="text-sm text-slate-400">Prenez le temps de préparer votre réponse, puis enregistrez-vous.</p>
+                    <div className="flex-1 flex flex-col py-8">
+                        {/* Question Card */}
+                        <div className="mb-8 animate-fade-in">
+                            <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl border border-slate-600/30 p-6 max-w-2xl mx-auto">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 rounded-full bg-rose-500/20 flex items-center justify-center">
+                                        <span className="text-rose-400 font-bold">Q</span>
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-white">Sujet de l'épreuve</h3>
+                                </div>
+                                <p className="text-slate-300 leading-relaxed">{currentQ.text}</p>
+                                <p className="text-sm text-slate-500 mt-4 pt-4 border-t border-slate-700/50">
+                                    💡 Prenez le temps de préparer votre réponse, puis enregistrez-vous.
+                                </p>
+                            </div>
                         </div>
-                        <VoiceRecorder onRecordingComplete={(url) => setAnswers({...answers, [currentQ.id]: url})} />
+
+                        {/* Voice Recorder */}
+                        <div className="flex-1 flex items-center justify-center animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                            <VoiceRecorder onRecordingComplete={(url) => setAnswers({...answers, [currentQ.id]: url})} />
+                        </div>
+
+                        {/* Submit Button */}
                         {answers[currentQ.id] && (
-                            <Button onClick={handleFinish} className="mt-8">
-                                Terminer l'épreuve
-                            </Button>
+                            <div className="flex justify-center mt-8 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+                                <Button
+                                    onClick={handleFinish}
+                                    variant="primary"
+                                    className="px-10 py-4 text-lg bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 shadow-lg shadow-rose-500/30"
+                                >
+                                    Terminer l'épreuve
+                                </Button>
+                            </div>
                         )}
                     </div>
                 )}
