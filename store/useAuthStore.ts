@@ -7,7 +7,7 @@ import { tokenStorage } from '../services/api';
 interface AuthActions {
   initialize: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, phone: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   logoutAll: () => Promise<void>;
   forgotPassword: (email: string) => Promise<string>;
@@ -76,12 +76,13 @@ export const useAuthStore = create<AuthStore>()(
         }
       },
 
-      register: async (name: string, email: string, password: string) => {
+      register: async (name: string, email: string, phone: string, password: string) => {
         set({ isLoading: true, error: null });
         try {
           const response = await authService.register({
             name,
             email,
+            phone,
             password,
             password_confirmation: password,
           });

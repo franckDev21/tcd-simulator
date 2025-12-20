@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, User as UserIcon, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
+import { X, Mail, User as UserIcon, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import { GlassCard, Button } from './GlassUI';
+import { PhoneInput } from './PhoneInput';
+import { PasswordInput } from './PasswordInput';
 import { useAppStore } from '../store/useAppStore';
 import { useAuthStore } from '../store/useAuthStore';
 import type { AuthModalMode } from '../types/auth';
@@ -12,6 +14,7 @@ export const AuthModal: React.FC = () => {
   const [mode, setMode] = useState<AuthModalMode>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -20,6 +23,7 @@ export const AuthModal: React.FC = () => {
   const resetForm = () => {
     setName('');
     setEmail('');
+    setPhone('');
     setPassword('');
     setPasswordConfirm('');
     setSuccessMessage('');
@@ -48,6 +52,10 @@ export const AuthModal: React.FC = () => {
     if (mode === 'register') {
       if (!name.trim()) {
         setLocalError('Le nom est requis');
+        return false;
+      }
+      if (!phone.trim()) {
+        setLocalError('Le numéro de téléphone est requis');
         return false;
       }
       if (password.length < 8) {
@@ -80,12 +88,15 @@ export const AuthModal: React.FC = () => {
           id: String(authState.user.id),
           name: authState.user.name,
           email: authState.user.email,
+          phoneNumber: authState.user.phone || undefined,
+          avatar: authState.user.avatar || undefined,
+          createdAt: authState.user.created_at,
           isPremium: false,
         });
         toggleAuthModal(false); // Fermer la modal après connexion
       }
     } else if (mode === 'register') {
-      await register(name, email, password);
+      await register(name, email, phone, password);
       showCheckEmail(email);
       toggleAuthModal(false); // Fermer après inscription
     } else if (mode === 'forgot-password') {
@@ -173,35 +184,36 @@ export const AuthModal: React.FC = () => {
               </div>
             </div>
 
+            {mode === 'register' && (
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Téléphone</label>
+                <PhoneInput
+                  value={phone}
+                  onChange={setPhone}
+                  placeholder="+237 6XX XXX XXX"
+                />
+              </div>
+            )}
+
             {mode !== 'forgot-password' && (
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1">Mot de passe</label>
-                <div className="relative">
-                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all"
-                    placeholder="••••••••"
-                  />
-                </div>
+                <PasswordInput
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
               </div>
             )}
 
             {mode === 'register' && (
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1">Confirmer le mot de passe</label>
-                <div className="relative">
-                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <input
-                    type="password"
-                    value={passwordConfirm}
-                    onChange={(e) => setPasswordConfirm(e.target.value)}
-                    className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all"
-                    placeholder="••••••••"
-                  />
-                </div>
+                <PasswordInput
+                  value={passwordConfirm}
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
+                  placeholder="••••••••"
+                />
               </div>
             )}
 

@@ -1,6 +1,26 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const STORAGE_URL = import.meta.env.VITE_STORAGE_URL || 'http://localhost:8000/storage';
+
+/**
+ * Build full URL for storage assets (avatars, images, etc.)
+ * @param path - Relative path from storage (e.g., "avatars/users/xxx.jpg")
+ * @returns Full URL (e.g., "http://localhost:8000/storage/avatars/users/xxx.jpg")
+ */
+export const getStorageUrl = (path: string | null | undefined): string | null => {
+  if (!path) return null;
+
+  // If already a full URL, return as is
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+
+  // Remove leading slash if present
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+
+  return `${STORAGE_URL}/${cleanPath}`;
+};
 
 export const api = axios.create({
   baseURL: API_URL,

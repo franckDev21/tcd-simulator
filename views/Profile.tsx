@@ -1,9 +1,29 @@
-
 import React from 'react';
-import { User, Mail, Calendar, Award, Phone, Settings } from 'lucide-react';
+import { Mail, Calendar, Award, Phone, Settings } from 'lucide-react';
 import { GlassCard, Button } from '../components/GlassUI';
 import { useAppStore } from '../store/useAppStore';
 import { MOCK_HISTORY } from '../constants';
+import { getStorageUrl } from '../services/api';
+
+/**
+ * Format a date string to French locale format
+ * @param dateString - ISO date string (e.g., "2023-10-12T10:30:00.000000Z")
+ * @returns Formatted date string (e.g., "12 Oct 2023")
+ */
+const formatDate = (dateString: string | undefined): string => {
+  if (!dateString) return 'Date inconnue';
+
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  } catch {
+    return 'Date inconnue';
+  }
+};
 
 export const Profile: React.FC = () => {
   const { user, setView } = useAppStore();
@@ -22,7 +42,7 @@ export const Profile: React.FC = () => {
 
         <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-4xl font-bold text-white shadow-2xl overflow-hidden border-4 border-glass-border">
           {user.avatar ? (
-            <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+            <img src={getStorageUrl(user.avatar) || ''} alt="Avatar" className="w-full h-full object-cover" />
           ) : (
             user.name.charAt(0)
           )}
@@ -34,7 +54,9 @@ export const Profile: React.FC = () => {
             {user.phoneNumber && (
               <span className="flex items-center gap-1 justify-center md:justify-start"><Phone size={14}/> {user.phoneNumber}</span>
             )}
-            <span className="flex items-center gap-1 justify-center md:justify-start"><Calendar size={14}/> Inscrit le 12 Oct 2023</span>
+            <span className="flex items-center gap-1 justify-center md:justify-start">
+              <Calendar size={14}/> Inscrit le {formatDate(user.createdAt)}
+            </span>
           </div>
           <div className="pt-2">
             {user.isPremium ? (

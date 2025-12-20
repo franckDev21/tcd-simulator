@@ -4,6 +4,7 @@ import { useAppStore } from '../store/useAppStore';
 import { Button } from './GlassUI';
 import { ChatWidget } from './ChatWidget';
 import { useTheme } from '../hooks/useTheme';
+import { getStorageUrl } from '../services/api';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, setView, logout, toggleAuthModal } = useAppStore();
@@ -63,8 +64,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
                 <div className="relative group">
                   <button className="flex items-center gap-2 hover:bg-glass-200 px-2 py-1 md:px-3 md:py-1.5 rounded-full transition-all border border-transparent hover:border-glass-border">
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
-                      {user.name.charAt(0)}
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold overflow-hidden">
+                      {user.avatar ? (
+                        <img src={getStorageUrl(user.avatar) || ''} alt={user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        user.name.charAt(0)
+                      )}
                     </div>
                   </button>
                   

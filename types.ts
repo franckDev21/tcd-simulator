@@ -23,6 +23,7 @@ export interface User {
   isPremium: boolean;
   subscriptionPlan?: 'daily' | 'weekly' | 'monthly';
   avatar?: string;
+  createdAt?: string;
 }
 
 export interface ExamSession {

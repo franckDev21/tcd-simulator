@@ -2,9 +2,35 @@ export interface AuthUser {
   id: number;
   name: string;
   email: string;
+  phone: string | null;
+  avatar: string | null;
   email_verified_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface UpdateProfileData {
+  name?: string;
+  email?: string;
+  phone?: string;
+}
+
+export interface UpdatePasswordData {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
+}
+
+export interface ProfileResponse {
+  message: string;
+  user: AuthUser;
+  email_verification_required?: boolean;
+}
+
+export interface AvatarResponse {
+  message: string;
+  user: AuthUser;
+  avatar_url: string;
 }
 
 export interface LoginCredentials {
@@ -16,6 +42,7 @@ export interface LoginCredentials {
 export interface RegisterCredentials {
   name: string;
   email: string;
+  phone: string;
   password: string;
   password_confirmation: string;
   device_name?: string;

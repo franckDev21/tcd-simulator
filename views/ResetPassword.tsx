@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Lock, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
+import { CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import { GlassCard, Button } from '../components/GlassUI';
+import { PasswordInput } from '../components/PasswordInput';
 import { useAuthStore } from '../store/useAuthStore';
 import { useAppStore } from '../store/useAppStore';
 
@@ -102,30 +103,20 @@ export const ResetPassword: React.FC<ResetPasswordProps> = ({ token, email, onCo
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1">Nouveau mot de passe</label>
-            <div className="relative">
-              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all"
-                placeholder="••••••••"
-              />
-            </div>
+            <PasswordInput
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+            />
           </div>
 
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1">Confirmer le mot de passe</label>
-            <div className="relative">
-              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-              <input
-                type="password"
-                value={passwordConfirm}
-                onChange={(e) => setPasswordConfirm(e.target.value)}
-                className="w-full bg-glass-200 border border-glass-border rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 transition-all"
-                placeholder="••••••••"
-              />
-            </div>
+            <PasswordInput
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              placeholder="••••••••"
+            />
           </div>
 
           <Button type="submit" className="w-full mt-6" loading={isLoading}>
