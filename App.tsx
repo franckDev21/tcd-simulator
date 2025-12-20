@@ -58,9 +58,8 @@ const clearUrlParams = () => {
 };
 
 const AppContent = () => {
-  const { view, activeModule, isAuthModalOpen, startExam, user, pendingVerificationEmail, clearPendingEmail } = useAppStore();
+  const { view, activeModule, activeSeriesId, isAuthModalOpen, selectSeries, user, pendingVerificationEmail, clearPendingEmail } = useAppStore();
   const { initialize, isInitialized, isAuthenticated } = useAuthStore();
-  const [currentQuestions, setCurrentQuestions] = useState<Question[]>([]);
   const [specialRoute, setSpecialRoute] = useState<SpecialRoute>(null);
 
   // Initialize auth on mount
@@ -129,32 +128,8 @@ const AppContent = () => {
     );
   }
 
-  // Function to generate a full exam series (39 questions) based on module and series ID
-  const generateQuestionsForSeries = (mod: ModuleType, seriesId: number): Question[] => {
-     let baseQuestions: Question[] = [];
-     if (mod === ModuleType.READING) baseQuestions = MOCK_READING_QUESTIONS;
-     else if (mod === ModuleType.LISTENING) baseQuestions = MOCK_LISTENING_QUESTIONS;
-     else return WRITING_PROMPTS;
-
-     // Generate 39 questions by cycling through mock data
-     const fullSeries: Question[] = [];
-     for(let i = 0; i < 39; i++) {
-        const template = baseQuestions[i % baseQuestions.length];
-        fullSeries.push({
-            ...template,
-            id: i + 1,
-            text: `${template.text} (Série ${seriesId} - Question ${i + 1})`
-        });
-     }
-     return fullSeries;
-  };
-
   const handleSeriesSelect = (seriesId: number) => {
-      if (activeModule) {
-          const questions = generateQuestionsForSeries(activeModule, seriesId);
-          setCurrentQuestions(questions);
-          startExam(activeModule);
-      }
+      selectSeries(seriesId);
   };
 
   // Protected views that require authentication
@@ -177,8 +152,8 @@ const AppContent = () => {
       case 'DASHBOARD': return <Dashboard onStartExam={() => {}} />;
       case 'SERIES_SELECTION': return <SeriesSelection onSelectSeries={handleSeriesSelect} />;
       case 'EXAM_RUNNER':
-        return activeModule
-            ? <ExamRunner module={activeModule} questions={currentQuestions.length > 0 ? currentQuestions : generateQuestionsForSeries(activeModule, 1)} />
+        return activeModule && activeSeriesId
+            ? <ExamRunner />
             : <Dashboard onStartExam={() => {}} />;
       case 'RESULTS': return <Results />;
       case 'CORRECTION': return <Correction />;

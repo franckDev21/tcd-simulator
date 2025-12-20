@@ -1,8 +1,9 @@
-import React from 'react';
-import { Lock, Unlock, ArrowLeft } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Lock, ArrowLeft, Loader } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { ModuleType } from '../types';
 import { Button } from '../components/GlassUI';
+import { examService, ExamSeries } from '../services/examService';
 
 interface SeriesSelectionProps {
   onSelectSeries: (seriesId: number) => void;
@@ -10,23 +11,42 @@ interface SeriesSelectionProps {
 
 export const SeriesSelection: React.FC<SeriesSelectionProps> = ({ onSelectSeries }) => {
   const { activeModule, user, setView } = useAppStore();
+  const [seriesList, setSeriesList] = useState<ExamSeries[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Generate 21 series for display
-  const seriesList = Array.from({ length: 21 }, (_, i) => i + 1);
+  useEffect(() => {
+    const fetchSeries = async () => {
+        try {
+            const data = await examService.getAllExams();
+            // Filter by Active Module
+            const backendCode = getBackendModuleCode(activeModule);
+            const filtered = data.filter(s => s.module_type === backendCode);
+            setSeriesList(filtered);
+        } catch (error) {
+            console.error("Failed to fetch exams", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    if (activeModule) fetchSeries();
+  }, [activeModule]);
 
-  // Logic: First 3 are free, rest require premium
-  const isSeriesLocked = (id: number) => {
-    if (user?.isPremium) return false;
-    return id > 3;
-  };
+  const getBackendModuleCode = (m: ModuleType | null): string => {
+    if (m === ModuleType.READING) return 'CE';
+    if (m === ModuleType.LISTENING) return 'CO';
+    if (m === ModuleType.WRITING) return 'EE';
+    if (m === ModuleType.SPEAKING) return 'EO';
+    return 'CE';
+  }
 
-  const handleSeriesClick = (id: number) => {
-    if (isSeriesLocked(id)) {
+  const handleSeriesClick = (series: ExamSeries) => {
+    // If premium is required
+    if (series.is_premium && !user?.isPremium) {
       if (confirm("Cette série est réservée aux membres Premium. Voulez-vous voir les offres ?")) {
         setView('SUBSCRIPTION');
       }
     } else {
-      onSelectSeries(id);
+      onSelectSeries(series.id);
     }
   };
 
@@ -51,31 +71,41 @@ export const SeriesSelection: React.FC<SeriesSelectionProps> = ({ onSelectSeries
         <div className="hidden md:block w-24"></div> 
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {seriesList.map((id, index) => {
-          const locked = isSeriesLocked(id);
-          
-          return (
-            <button
-              key={id}
-              onClick={() => handleSeriesClick(id)}
-              className={`
-                relative h-14 md:h-16 rounded-full flex items-center justify-center font-semibold text-base md:text-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg animate-scale-in opacity-0
-                ${locked 
-                  ? 'bg-gray-600/40 text-gray-300 cursor-not-allowed border border-gray-600' 
-                  : 'bg-blue-600 hover:bg-blue-500 text-white border border-blue-400 shadow-blue-500/30'
-                }
-              `}
-              style={{ animationDelay: `${index * 30}ms` }}
-            >
-              <span className="mr-2">
-                {activeModule?.split(' ')[0]} Série {id}
-              </span>
-              {locked ? <Lock size={16} className="opacity-70" /> : null}
-            </button>
-          );
-        })}
-      </div>
+      {loading ? (
+          <div className="flex justify-center py-20">
+              <Loader className="animate-spin text-blue-500" size={40} />
+          </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {seriesList.length > 0 ? seriesList.map((series, index) => {
+            const isLocked = series.is_premium && !user?.isPremium;
+            
+            return (
+                <button
+                key={series.id}
+                onClick={() => handleSeriesClick(series)}
+                className={`
+                    relative h-14 md:h-16 rounded-full flex items-center justify-center font-semibold text-base md:text-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg animate-scale-in opacity-0
+                    ${isLocked 
+                    ? 'bg-gray-600/40 text-gray-300 cursor-not-allowed border border-gray-600' 
+                    : 'bg-blue-600 hover:bg-blue-500 text-white border border-blue-400 shadow-blue-500/30'
+                    }
+                `}
+                style={{ animationDelay: `${index * 30}ms` }}
+                >
+                <span className="mr-2">
+                    {series.title}
+                </span>
+                {isLocked ? <Lock size={16} className="opacity-70" /> : null}
+                </button>
+            );
+            }) : (
+                <div className="col-span-3 text-center py-10 text-slate-400">
+                    Aucune série disponible pour ce module pour l'instant.
+                </div>
+            )}
+        </div>
+      )}
 
       {!user?.isPremium && (
           <div className="mt-8 md:mt-12 p-6 rounded-2xl bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-blue-500/30 text-center animate-fade-in-up opacity-0" style={{ animationDelay: '600ms' }}>

@@ -16,6 +16,7 @@ interface AppState {
 
   // Exam State
   activeModule: ModuleType | null;
+  activeSeriesId: number | null;
 
   // Actions
   setView: (view: ViewState) => void;
@@ -24,6 +25,7 @@ interface AppState {
   logout: () => void;
   updateUser: (updatedData: Partial<User>) => void;
   openSeriesSelection: (module: ModuleType) => void;
+  selectSeries: (seriesId: number) => void;
   startExam: (module: ModuleType) => void;
   completeExam: () => void;
   upgradeUser: () => void;
@@ -39,6 +41,7 @@ export const useAppStore = create<AppState>()(
       user: null,
       pendingVerificationEmail: null,
       activeModule: null,
+      activeSeriesId: null,
 
       setView: (view) => set({ view }),
 
@@ -49,7 +52,7 @@ export const useAppStore = create<AppState>()(
       logout: () => {
         tokenStorage.remove();
         localStorage.removeItem('auth-storage');
-        set({ user: null, view: 'LANDING', activeModule: null, pendingVerificationEmail: null });
+        set({ user: null, view: 'LANDING', activeModule: null, activeSeriesId: null, pendingVerificationEmail: null });
       },
 
       updateUser: (updatedData) => set((state) => ({
@@ -58,6 +61,8 @@ export const useAppStore = create<AppState>()(
       })),
 
       openSeriesSelection: (module) => set({ activeModule: module, view: 'SERIES_SELECTION' }),
+
+      selectSeries: (seriesId) => set({ activeSeriesId: seriesId, view: 'EXAM_RUNNER' }),
 
       startExam: (module) => set({ activeModule: module, view: 'EXAM_RUNNER' }),
 

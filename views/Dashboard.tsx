@@ -1,45 +1,113 @@
-import React from 'react';
-import { Play, FileText, Mic, Headphones, Clock, Award, TrendingUp } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { FileText, Mic, Headphones, Clock, Award, TrendingUp, Loader2, History } from 'lucide-react';
 import { GlassCard, Button } from '../components/GlassUI';
 import { ScoreHistoryChart } from '../components/Charts';
-import { ModuleType, UserResult } from '../types';
-import { MOCK_HISTORY } from '../constants';
+import { ModuleType } from '../types';
 import { useAppStore } from '../store/useAppStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { examService, UserExamHistory } from '../services/examService';
 
 interface DashboardProps {
-  onStartExam: (module: ModuleType) => void; // Legacy, mostly unused now as we use store
+  onStartExam: (module: ModuleType) => void;
 }
+
+// Map module_type code to ModuleType enum
+const moduleTypeMap: Record<string, ModuleType> = {
+  'CE': ModuleType.READING,
+  'CO': ModuleType.LISTENING,
+  'EE': ModuleType.WRITING,
+  'EO': ModuleType.SPEAKING,
+};
+
+const getModuleTypeFromCode = (code: string): ModuleType => {
+  return moduleTypeMap[code] || ModuleType.READING;
+};
 
 export const Dashboard: React.FC<DashboardProps> = () => {
   const { openSeriesSelection, startExam, setView } = useAppStore();
+  const { user } = useAuthStore();
+  const [recentHistory, setRecentHistory] = useState<UserExamHistory[]>([]);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+
+  // Get user's first name with friendly greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    const firstName = user?.name?.split(' ')[0] || 'Candidat';
+
+    if (hour < 12) return { text: `Bonjour, ${firstName}`, emoji: '👋' };
+    if (hour < 18) return { text: `Bon après-midi, ${firstName}`, emoji: '☀️' };
+    return { text: `Bonsoir, ${firstName}`, emoji: '🌙' };
+  };
+
+  const greeting = getGreeting();
+
+  // Load recent history
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        setLoadingHistory(true);
+        const history = await examService.getUserHistory(6);
+        setRecentHistory(history);
+
+        // Transform for chart (last 7 results for trend)
+        const chartHistory = history.slice(0, 7).reverse().map((item) => ({
+          name: new Date(item.completed_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
+          score: item.score,
+          module: getModuleTypeFromCode(item.module_type)
+        }));
+        setChartData(chartHistory);
+      } catch (error) {
+        console.error('Failed to load history:', error);
+      } finally {
+        setLoadingHistory(false);
+      }
+    };
+
+    loadHistory();
+  }, []);
 
   const handleModuleClick = (module: ModuleType) => {
     if (module === ModuleType.READING || module === ModuleType.LISTENING) {
         openSeriesSelection(module);
     } else {
-        // For Writing/Speaking, we might go straight to exam or a specific prompt selection
-        // keeping direct access for now, or you could implement series for them too.
-        startExam(module); 
+        startExam(module);
     }
+  };
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Aujourd'hui";
+    if (diffDays === 1) return 'Hier';
+    if (diffDays < 7) return `Il y a ${diffDays} jours`;
+    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
   };
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8 animate-fade-in">
       <header className="flex justify-between items-center mb-8">
         <div>
-          <h2 className="text-3xl font-bold">Bonjour, Candidat</h2>
+          <h2 className="text-3xl font-bold flex items-center gap-3">
+            {greeting.text} <span className="text-2xl">{greeting.emoji}</span>
+          </h2>
           <p className="text-slate-400">Prêt pour votre prochaine simulation ?</p>
         </div>
         <div className="flex gap-2">
-          <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 animate-scale-in">
-            <Award size={16} /> Premium
-          </div>
+          {user?.isPremium && (
+            <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 animate-scale-in">
+              <Award size={16} /> Premium
+            </div>
+          )}
         </div>
       </header>
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Chart Section */}
         <div className="lg:col-span-2 space-y-6">
           <GlassCard className="animate-fade-in-up" style={{ animationDelay: '0ms' }}>
@@ -52,45 +120,51 @@ export const Dashboard: React.FC<DashboardProps> = () => {
                 <option>Mois dernier</option>
               </select>
             </div>
-            <ScoreHistoryChart data={MOCK_HISTORY} />
+            {chartData.length > 0 ? (
+              <ScoreHistoryChart data={chartData} />
+            ) : (
+              <div className="h-48 flex items-center justify-center text-slate-500">
+                <p>Aucune donnée disponible. Passez votre premier test !</p>
+              </div>
+            )}
           </GlassCard>
 
           {/* Module Selection */}
           <div className="grid md:grid-cols-2 gap-4">
             <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '100ms' }}>
-              <ModuleCard 
-                title="Compréhension Écrite" 
-                icon={FileText} 
-                color="text-blue-400" 
-                bg="bg-blue-500/10" 
-                onClick={() => handleModuleClick(ModuleType.READING)} 
+              <ModuleCard
+                title="Compréhension Écrite"
+                icon={FileText}
+                color="text-blue-400"
+                bg="bg-blue-500/10"
+                onClick={() => handleModuleClick(ModuleType.READING)}
               />
             </div>
             <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '150ms' }}>
-              <ModuleCard 
-                title="Compréhension Orale" 
-                icon={Headphones} 
-                color="text-purple-400" 
-                bg="bg-purple-500/10" 
-                onClick={() => handleModuleClick(ModuleType.LISTENING)} 
+              <ModuleCard
+                title="Compréhension Orale"
+                icon={Headphones}
+                color="text-purple-400"
+                bg="bg-purple-500/10"
+                onClick={() => handleModuleClick(ModuleType.LISTENING)}
               />
             </div>
             <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '200ms' }}>
-              <ModuleCard 
-                title="Expression Écrite" 
-                icon={EditIcon} 
-                color="text-emerald-400" 
-                bg="bg-emerald-500/10" 
-                onClick={() => handleModuleClick(ModuleType.WRITING)} 
+              <ModuleCard
+                title="Expression Écrite"
+                icon={EditIcon}
+                color="text-emerald-400"
+                bg="bg-emerald-500/10"
+                onClick={() => handleModuleClick(ModuleType.WRITING)}
               />
             </div>
             <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '250ms' }}>
-              <ModuleCard 
-                title="Expression Orale" 
-                icon={Mic} 
-                color="text-rose-400" 
-                bg="bg-rose-500/10" 
-                onClick={() => handleModuleClick(ModuleType.SPEAKING)} 
+              <ModuleCard
+                title="Expression Orale"
+                icon={Mic}
+                color="text-rose-400"
+                bg="bg-rose-500/10"
+                onClick={() => handleModuleClick(ModuleType.SPEAKING)}
               />
             </div>
           </div>
@@ -102,30 +176,53 @@ export const Dashboard: React.FC<DashboardProps> = () => {
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Clock size={18} /> Activité Récente
             </h3>
-            <div className="space-y-4">
-              {MOCK_HISTORY.map((item, idx) => (
-                <div 
-                  key={idx} 
-                  className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition cursor-pointer group animate-fade-in-up opacity-0"
-                  style={{ animationDelay: `${400 + (idx * 100)}ms` }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getModuleColor(item.module)}`}>
-                      <span className="font-bold text-sm">{item.level}</span>
+
+            {loadingHistory ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="animate-spin text-blue-500" size={24} />
+              </div>
+            ) : recentHistory.length === 0 ? (
+              <div className="text-center py-8 text-slate-500">
+                <History size={40} className="mx-auto mb-3 opacity-50" />
+                <p className="text-sm">Aucun test effectué</p>
+                <p className="text-xs mt-1">Commencez votre première simulation !</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {recentHistory.map((item, idx) => {
+                  const moduleType = getModuleTypeFromCode(item.module_type);
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition cursor-pointer group animate-fade-in-up opacity-0"
+                      style={{ animationDelay: `${400 + (idx * 100)}ms` }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getModuleColor(moduleType)}`}>
+                          <span className="font-bold text-sm">{item.level}</span>
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium">{moduleType}</div>
+                          <div className="text-xs text-slate-500">{formatDate(item.completed_at)}</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold">{item.score}</div>
+                        <div className="text-xs text-slate-500">/ {item.max_score}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-sm font-medium">{item.module}</div>
-                      <div className="text-xs text-slate-500">{item.date}</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold">{item.score}</div>
-                    <div className="text-xs text-slate-500">/ 699</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Button variant="ghost" className="w-full mt-6 text-sm">Voir tout l'historique</Button>
+                  );
+                })}
+              </div>
+            )}
+
+            <Button
+              variant="ghost"
+              className="w-full mt-6 text-sm"
+              onClick={() => setView('HISTORY')}
+            >
+              Voir tout l'historique
+            </Button>
           </GlassCard>
         </div>
       </div>

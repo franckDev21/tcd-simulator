@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GlassCard, Button } from '../components/GlassUI';
 import { useAppStore } from '../store/useAppStore';
-import { CheckCircle, XCircle, AlertTriangle, ChevronDown, ChevronUp, Eye, RotateCcw, ArrowLeft, Download } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye, RotateCcw, ArrowLeft, Download } from 'lucide-react';
 import { ProgressBar } from '../components/GlassUI';
 import { ModuleType } from '../types';
 import { jsPDF } from 'jspdf';
@@ -17,6 +17,105 @@ export const ResultsView: React.FC = () => {
       setResult(JSON.parse(saved));
     }
   }, []);
+
+  // ============================================
+  // ALGORITHME 1: Précision (Accuracy)
+  // ============================================
+  // Calcule le pourcentage de bonnes réponses
+  // Pour QCM: (nombre de bonnes réponses / nombre total de questions) * 100
+  // Pour Expression Écrite: basé sur le score normalisé
+  const calculateAccuracy = () => {
+    if (!result) return { value: 0, display: '0%' };
+
+    // Pour les modules QCM (CE, CO)
+    if (result.correctCount !== undefined && result.totalQuestions !== undefined && result.totalQuestions > 0) {
+      const accuracy = Math.round((result.correctCount / result.totalQuestions) * 100);
+      return { value: accuracy, display: `${accuracy}%` };
+    }
+
+    // Pour Expression Écrite/Orale: utiliser le ratio score/maxScore
+    if (result.score !== undefined && result.maxScore !== undefined && result.maxScore > 0) {
+      const accuracy = Math.round((result.score / result.maxScore) * 100);
+      return { value: accuracy, display: `${accuracy}%` };
+    }
+
+    return { value: 0, display: 'N/A' };
+  };
+
+  // ============================================
+  // ALGORITHME 2: Gestion du temps (Time Management)
+  // ============================================
+  // Analyse la performance temporelle du candidat
+  //
+  // Principe: On compare le temps utilisé (timeSpent) au temps total (totalTime)
+  //
+  // Zones de performance:
+  // - Excellent (90-100%): Le candidat a utilisé entre 70% et 95% du temps
+  //   => Il a pris son temps mais pas trop, optimal pour la réflexion
+  //
+  // - Bien (70-89%): Le candidat a utilisé entre 50% et 70% OU entre 95% et 100%
+  //   => Soit un peu rapide (peut améliorer la vérification)
+  //   => Soit un peu serré (gérer mieux le rythme)
+  //
+  // - Moyen (40-69%): Le candidat a utilisé moins de 50% du temps
+  //   => Trop rapide, risque de réponses précipitées
+  //
+  // - Insuffisant (<40%): Le candidat a utilisé plus de 100% (temps écoulé)
+  //   => N'a pas pu finir dans les temps
+  const calculateTimeManagement = () => {
+    if (!result || !result.timeSpent || !result.totalTime || result.totalTime === 0) {
+      return { value: 50, display: 'N/A', label: 'Non mesuré' };
+    }
+
+    const timeRatio = result.timeSpent / result.totalTime;
+
+    // Cas 1: Temps optimal (70-95% du temps utilisé)
+    // Le candidat a bien géré son temps avec marge pour vérifier
+    if (timeRatio >= 0.70 && timeRatio <= 0.95) {
+      const score = 90 + Math.round((1 - Math.abs(0.825 - timeRatio) / 0.125) * 10);
+      return {
+        value: Math.min(100, score),
+        display: 'Excellent',
+        label: 'Gestion optimale du temps'
+      };
+    }
+
+    // Cas 2: Bien géré mais améliorable
+    // Soit un peu rapide (50-70%), soit serré (95-100%)
+    if ((timeRatio >= 0.50 && timeRatio < 0.70) || (timeRatio > 0.95 && timeRatio <= 1.0)) {
+      const score = 70 + Math.round((timeRatio >= 0.50 && timeRatio < 0.70
+        ? (timeRatio - 0.50) / 0.20
+        : (1.0 - timeRatio) / 0.05) * 15);
+      return {
+        value: Math.min(89, Math.max(70, score)),
+        display: 'Bien',
+        label: timeRatio < 0.70 ? 'Un peu rapide' : 'Temps serré'
+      };
+    }
+
+    // Cas 3: Trop rapide (moins de 50%)
+    // Risque d'erreurs par précipitation
+    if (timeRatio < 0.50) {
+      const score = 40 + Math.round((timeRatio / 0.50) * 29);
+      return {
+        value: Math.max(40, score),
+        display: 'Moyen',
+        label: 'Réponses précipitées'
+      };
+    }
+
+    // Cas 4: Temps dépassé (plus de 100%)
+    // Le candidat n'a pas pu finir dans les temps
+    const overrunPenalty = Math.min(30, (timeRatio - 1.0) * 100);
+    return {
+      value: Math.max(10, 40 - overrunPenalty),
+      display: 'Insuffisant',
+      label: 'Temps dépassé'
+    };
+  };
+
+  const accuracy = calculateAccuracy();
+  const timeManagement = calculateTimeManagement();
 
   if (!result) return <div className="p-8 text-center">Aucun résultat trouvé.</div>;
 
@@ -209,12 +308,35 @@ export const ResultsView: React.FC = () => {
            <h3 className="font-bold border-b border-glass-border pb-2">Analyse rapide</h3>
            <div className="space-y-4">
               <div>
-                <div className="flex justify-between text-sm mb-1"><span>Précision</span> <span className="text-green-500">78%</span></div>
-                <ProgressBar value={78} max={100} />
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Précision</span>
+                  <span className={accuracy.value >= 70 ? 'text-green-500' : accuracy.value >= 50 ? 'text-yellow-500' : 'text-red-500'}>
+                    {accuracy.display}
+                  </span>
+                </div>
+                <ProgressBar value={accuracy.value} max={100} />
+                {result.correctCount !== undefined && result.totalQuestions !== undefined && (
+                  <p className="text-xs text-slate-500 mt-1">{result.correctCount} / {result.totalQuestions} bonnes réponses</p>
+                )}
               </div>
               <div>
-                <div className="flex justify-between text-sm mb-1"><span>Gestion du temps</span> <span className="text-blue-500">Bien</span></div>
-                <ProgressBar value={85} max={100} />
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Gestion du temps</span>
+                  <span className={
+                    timeManagement.display === 'Excellent' ? 'text-green-500' :
+                    timeManagement.display === 'Bien' ? 'text-blue-500' :
+                    timeManagement.display === 'Moyen' ? 'text-yellow-500' :
+                    timeManagement.display === 'Insuffisant' ? 'text-red-500' : 'text-slate-400'
+                  }>
+                    {timeManagement.display}
+                  </span>
+                </div>
+                <ProgressBar value={timeManagement.value} max={100} />
+                {result.timeSpent !== undefined && result.totalTime !== undefined && (
+                  <p className="text-xs text-slate-500 mt-1">
+                    {Math.floor(result.timeSpent / 60)}:{(result.timeSpent % 60).toString().padStart(2, '0')} / {Math.floor(result.totalTime / 60)}:{(result.totalTime % 60).toString().padStart(2, '0')} • {timeManagement.label}
+                  </p>
+                )}
               </div>
            </div>
         </GlassCard>

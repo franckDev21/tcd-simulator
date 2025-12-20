@@ -11,7 +11,8 @@ export interface Question {
   text: string;
   options?: string[]; // For QCM
   correctAnswer?: number; // Index of correct option
-  assetUrl?: string; // Image for reading, Placeholder for audio
+  audioUrl?: string;
+  imageUrl?: string;
   points: number;
 }
 
@@ -44,9 +45,15 @@ export interface UserResult {
   // New fields for detailed QCM correction
   questions?: Question[];
   userAnswers?: Record<number, any>;
+  // Time tracking
+  timeSpent?: number; // seconds spent on exam
+  totalTime?: number; // total exam duration in seconds
+  // Statistics
+  correctCount?: number;
+  totalQuestions?: number;
 }
 
-export type ViewState = 'LANDING' | 'DASHBOARD' | 'PROFILE' | 'EDIT_PROFILE' | 'SUBSCRIPTION' | 'EXAM_RUNNER' | 'RESULTS' | 'SERIES_SELECTION' | 'CORRECTION' | 'ALL_PLANS' | 'CONTACT_SALES' | 'CHECK_EMAIL';
+export type ViewState = 'LANDING' | 'DASHBOARD' | 'PROFILE' | 'EDIT_PROFILE' | 'SUBSCRIPTION' | 'EXAM_RUNNER' | 'RESULTS' | 'SERIES_SELECTION' | 'CORRECTION' | 'ALL_PLANS' | 'CONTACT_SALES' | 'CHECK_EMAIL' | 'HISTORY';
 
 export interface CorrectionResult {
   score: number;
