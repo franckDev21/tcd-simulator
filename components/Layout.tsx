@@ -47,7 +47,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                    <Button 
                     variant="primary" 
                     className="hidden sm:flex px-3 py-1.5 h-8 text-xs md:text-sm"
-                    onClick={() => setView('SUBSCRIPTION')}
+                    onClick={() => setView('ALL_PLANS')}
                    >
                      Premium
                    </Button>
@@ -55,7 +55,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 {/* Mobile Premium Icon only */}
                 {!user.isPremium && (
                    <button 
-                    onClick={() => setView('SUBSCRIPTION')}
+                    onClick={() => setView('ALL_PLANS')}
                     className="sm:hidden w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg"
                    >
                      <CreditCard size={14} />
