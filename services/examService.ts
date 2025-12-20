@@ -12,6 +12,25 @@ export interface ExamSeries {
   question_count: number;
 }
 
+/**
+ * Smart sort: extracts numbers from titles and sorts ascending.
+ * Examples: "Série 1" -> 1, "Test 10" -> 10
+ */
+const smartSortExams = (exams: ExamSeries[]): ExamSeries[] => {
+  return [...exams].sort((a, b) => {
+    const extractNumber = (title: string): number => {
+      const matches = title.match(/\d+/g);
+      return matches ? parseInt(matches[0], 10) : Infinity;
+    };
+    const numA = extractNumber(a.title);
+    const numB = extractNumber(b.title);
+    if (numA !== Infinity && numB !== Infinity) return numA - numB;
+    if (numA !== Infinity) return -1;
+    if (numB !== Infinity) return 1;
+    return a.title.localeCompare(b.title, 'fr');
+  });
+};
+
 export interface ExamDetail extends ExamSeries {
   questions: ApiQuestion[];
 }
@@ -71,7 +90,8 @@ export const examService = {
   // Get all active exams
   async getAllExams(): Promise<ExamSeries[]> {
     const response = await api.get<ExamSeries[]>('/user/exams');
-    return response.data;
+    // Smart sort by extracting numbers from titles
+    return smartSortExams(response.data);
   },
 
   // Get specific exam with questions

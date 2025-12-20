@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, Moon, User as UserIcon, LogOut, CreditCard } from 'lucide-react';
+import { Sun, Moon, User as UserIcon, LogOut, CreditCard, History } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { Button } from './GlassUI';
 import { ChatWidget } from './ChatWidget';
@@ -77,6 +77,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   <div className="absolute right-0 mt-2 w-48 py-2 bg-glass-bg border border-glass-border rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform translate-y-2 group-hover:translate-y-0 backdrop-blur-xl">
                     <button onClick={() => setView('PROFILE')} className="w-full text-left px-4 py-2 hover:bg-glass-200 flex items-center gap-2 text-sm">
                       <UserIcon size={16} /> Mon Profil
+                    </button>
+                    <button onClick={() => setView('HISTORY')} className="w-full text-left px-4 py-2 hover:bg-glass-200 flex items-center gap-2 text-sm">
+                      <History size={16} /> Mon Historique
                     </button>
                     <button onClick={() => setView('SUBSCRIPTION')} className="w-full text-left px-4 py-2 hover:bg-glass-200 flex items-center gap-2 text-sm">
                       <CreditCard size={16} /> Abonnement
