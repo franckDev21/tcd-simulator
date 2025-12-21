@@ -53,7 +53,7 @@ export interface UserResult {
   totalQuestions?: number;
 }
 
-export type ViewState = 'LANDING' | 'DASHBOARD' | 'PROFILE' | 'EDIT_PROFILE' | 'SUBSCRIPTION' | 'EXAM_RUNNER' | 'RESULTS' | 'SERIES_SELECTION' | 'CORRECTION' | 'ALL_PLANS' | 'CONTACT_SALES' | 'CHECK_EMAIL' | 'HISTORY' | 'ATTEMPT_DETAIL';
+export type ViewState = 'LANDING' | 'DASHBOARD' | 'PROFILE' | 'EDIT_PROFILE' | 'SUBSCRIPTION' | 'EXAM_RUNNER' | 'RESULTS' | 'SERIES_SELECTION' | 'CORRECTION' | 'ALL_PLANS' | 'CONTACT_SALES' | 'CHECK_EMAIL' | 'HISTORY' | 'ATTEMPT_DETAIL' | 'CHECKOUT';
 
 export interface CorrectionResult {
   score: number;

@@ -17,6 +17,7 @@ import { ResetPassword } from './views/ResetPassword';
 import { CheckEmail } from './views/CheckEmail';
 import { HistoryPage } from './views/HistoryPage';
 import { AttemptDetail } from './views/AttemptDetail';
+import { Checkout } from './views/Checkout';
 import { MOCK_READING_QUESTIONS, MOCK_LISTENING_QUESTIONS, WRITING_PROMPTS } from './constants';
 import { useAppStore } from './store/useAppStore';
 import { useAuthStore } from './store/useAuthStore';
@@ -135,7 +136,7 @@ const AppContent = () => {
   };
 
   // Protected views that require authentication
-  const protectedViews = ['DASHBOARD', 'EXAM_RUNNER', 'PROFILE', 'EDIT_PROFILE', 'SUBSCRIPTION', 'RESULTS', 'SERIES_SELECTION', 'CORRECTION', 'HISTORY', 'ATTEMPT_DETAIL'];
+  const protectedViews = ['DASHBOARD', 'EXAM_RUNNER', 'PROFILE', 'EDIT_PROFILE', 'SUBSCRIPTION', 'RESULTS', 'SERIES_SELECTION', 'CORRECTION', 'HISTORY', 'ATTEMPT_DETAIL', 'CHECKOUT'];
   const isProtectedView = protectedViews.includes(view);
 
   // Redirect to landing if trying to access protected view without auth
@@ -170,6 +171,7 @@ const AppContent = () => {
           : <Landing />;
       case 'HISTORY': return <HistoryPage />;
       case 'ATTEMPT_DETAIL': return <AttemptDetail />;
+      case 'CHECKOUT': return <Checkout />;
       default: return <Landing />;
     }
   };

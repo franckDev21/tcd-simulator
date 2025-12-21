@@ -18,6 +18,7 @@ interface AppState {
   activeModule: ModuleType | null;
   activeSeriesId: number | null;
   activeAttemptId: number | null;
+  selectedPlanId: number | null;
 
   // Actions
   setView: (view: ViewState) => void;
@@ -33,6 +34,7 @@ interface AppState {
   showCheckEmail: (email: string) => void;
   clearPendingEmail: () => void;
   viewAttemptDetail: (attemptId: number) => void;
+  selectPlanForCheckout: (planId: number) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -45,6 +47,7 @@ export const useAppStore = create<AppState>()(
       activeModule: null,
       activeSeriesId: null,
       activeAttemptId: null,
+      selectedPlanId: null,
 
       setView: (view) => set({ view }),
 
@@ -81,6 +84,8 @@ export const useAppStore = create<AppState>()(
       clearPendingEmail: () => set({ pendingVerificationEmail: null, view: 'LANDING' }),
 
       viewAttemptDetail: (attemptId) => set({ activeAttemptId: attemptId, view: 'ATTEMPT_DETAIL' }),
+
+      selectPlanForCheckout: (planId) => set({ selectedPlanId: planId, view: 'CHECKOUT' }),
     }),
     {
       name: 'tcf-storage',

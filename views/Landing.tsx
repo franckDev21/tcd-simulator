@@ -1,10 +1,28 @@
-import React from 'react';
-import { ArrowRight, Check, Star, Zap, UserCheck, HelpCircle, Laptop, Clock, BarChart3, Smartphone, ChevronRight, TrendingUp } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowRight, Check, Star, Zap, UserCheck, HelpCircle, Laptop, Clock, BarChart3, Smartphone, ChevronRight, TrendingUp, Loader2 } from 'lucide-react';
 import { Button } from '../components/GlassUI';
 import { useAppStore } from '../store/useAppStore';
+import { subscriptionService, SubscriptionPlan, formatPrice } from '../services/subscriptionService';
 
 export const Landing: React.FC = () => {
   const { setView, toggleAuthModal } = useAppStore();
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
+
+  // Load home page plans on mount
+  useEffect(() => {
+    const loadPlans = async () => {
+      try {
+        const homePlans = await subscriptionService.getHomePlans();
+        setPlans(homePlans);
+      } catch (error) {
+        console.error('Failed to load plans:', error);
+      } finally {
+        setLoadingPlans(false);
+      }
+    };
+    loadPlans();
+  }, []);
 
   const handleStart = () => {
     toggleAuthModal(true);
@@ -289,34 +307,28 @@ export const Landing: React.FC = () => {
             <p className="text-slate-500 text-lg">Investissez dans votre avenir pour le prix d'un café par semaine.</p>
           </div>
           
-          {/* Featured Cards */}
-          <div className="grid md:grid-cols-3 gap-8 items-center">
-             <PricingCard 
-               title="Découverte" 
-               price="Gratuit" 
-               period="pour toujours"
-               features={["1 série gratuite par module", "Score global estimé", "Accès standard"]}
-               btnText="Créer un compte"
-               onClick={handleStart}
-             />
-             <PricingCard 
-               title="Hebdomadaire" 
-               price="2 000 FCFA" 
-               period="/ semaine"
-               features={["Accès ILLIMITÉ aux 50+ séries", "Correction IA Expression Écrite", "Correction IA Expression Orale", "Statistiques détaillées"]}
-               isPopular
-               btnText="Choisir ce plan"
-               onClick={handlePricing}
-             />
-             <PricingCard 
-               title="Mensuel" 
-               price="5 000 FCFA" 
-               period="/ mois"
-               features={["Tout le pack Hebdo", "Mentorat IA personnalisé", "Support prioritaire", "Badge Certifié"]}
-               btnText="Choisir ce plan"
-               onClick={handlePricing}
-             />
-          </div>
+          {/* Featured Cards - Dynamic from API */}
+          {loadingPlans ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="animate-spin text-blue-500" size={40} />
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-8 items-center">
+              {plans.map((plan) => (
+                <PricingCard
+                  key={plan.id}
+                  title={plan.name}
+                  price={formatPrice(plan.price)}
+                  period={plan.duration_label}
+                  features={plan.features}
+                  isPopular={plan.is_highlighted}
+                  highlightLabel={plan.highlight_label}
+                  btnText={plan.price === 0 ? "Créer un compte" : "Choisir ce plan"}
+                  onClick={plan.price === 0 ? handleStart : handlePricing}
+                />
+              ))}
+            </div>
+          )}
 
           {/* New Link to All Plans */}
           <div className="mt-12 text-center">
@@ -372,19 +384,19 @@ export const Landing: React.FC = () => {
 
 // --- Reusable Component Helpers (Pricing & FAQ) kept simple for cleanliness ---
 
-const PricingCard = ({ title, price, period, features, isPopular, btnText, onClick }: any) => (
-  <div 
+const PricingCard = ({ title, price, period, features, isPopular, highlightLabel, btnText, onClick }: any) => (
+  <div
     className={`
       relative p-8 rounded-2xl border transition-all duration-300 flex flex-col h-full
-      ${isPopular 
-        ? 'bg-glass-200 border-blue-400 shadow-2xl shadow-blue-500/20 z-10 transform md:scale-105' 
+      ${isPopular
+        ? 'bg-glass-200 border-blue-400 shadow-2xl shadow-blue-500/20 z-10 transform md:scale-105'
         : 'bg-glass-100 border-glass-border hover:border-glass-border/80'
       }
     `}
   >
     {isPopular && (
       <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-lg border border-blue-400 flex items-center gap-1">
-        <Zap size={12} fill="currentColor" /> Populaire
+        <Zap size={12} fill="currentColor" /> {highlightLabel || 'Populaire'}
       </div>
     )}
     

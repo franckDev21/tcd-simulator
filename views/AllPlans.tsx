@@ -1,67 +1,132 @@
-import React from 'react';
-import { ArrowLeft, Check, Zap, Crown, Clock, Calendar, Users } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowLeft, Check, Zap, Crown, Clock, Calendar, Users, Loader2 } from 'lucide-react';
 import { Button } from '../components/GlassUI';
 import { useAppStore } from '../store/useAppStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { subscriptionService, SubscriptionPlan, formatPrice } from '../services/subscriptionService';
+
+// Map duration_days to appropriate icon
+const getIconForDuration = (days: number) => {
+  if (days <= 1) return Clock;
+  if (days <= 2) return Calendar;
+  if (days <= 7) return Zap;
+  if (days <= 30) return Crown;
+  if (days <= 90) return Users;
+  return Crown;
+};
+
+// Map badge_color to CSS class
+const getColorClass = (badgeColor: string | null, isHighlighted: boolean): string => {
+  switch (badgeColor) {
+    case 'gold': return 'bg-amber-500/20';
+    case 'blue': return 'bg-blue-500/20';
+    case 'green': return 'bg-emerald-500/20';
+    case 'purple': return 'bg-purple-500/20';
+    default: return isHighlighted ? 'bg-indigo-500/20' : 'bg-slate-500/20';
+  }
+};
 
 export const AllPlans: React.FC = () => {
-  const { setView } = useAppStore();
+  const { setView, selectPlanForCheckout, toggleAuthModal } = useAppStore();
+  const { isAuthenticated } = useAuthStore();
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubscribe = (plan: string) => {
-    // In a real app, you might pass the selected plan ID to the checkout flow
-    setView('SUBSCRIPTION');
+  useEffect(() => {
+    const loadPlans = async () => {
+      try {
+        const allPlans = await subscriptionService.getPlans();
+        setPlans(allPlans);
+      } catch (error) {
+        console.error('Failed to load plans:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadPlans();
+  }, []);
+
+  const handleSubscribe = (plan: SubscriptionPlan) => {
+    if (!isAuthenticated) {
+      // Store selected plan and open auth modal
+      localStorage.setItem('pendingPlanId', plan.id.toString());
+      toggleAuthModal(true);
+      return;
+    }
+
+    // Redirect to checkout page with selected plan
+    selectPlanForCheckout(plan.id);
   };
 
-  const PlanCard = ({ title, price, period, icon: Icon, features, type, color, delay }: any) => {
-    const isPremium = type === 'premium';
-    const isValue = type === 'value';
+  const PlanCard = ({ plan, delay }: { plan: SubscriptionPlan; delay: number }) => {
+    const isPremium = plan.badge_color === 'gold' || plan.highlight_label === 'Premium';
+    const isValue = plan.highlight_label === 'Meilleure valeur' || (plan.is_highlighted && !isPremium);
+    const Icon = getIconForDuration(plan.duration_days);
+    const colorClass = getColorClass(plan.badge_color, plan.is_highlighted);
 
     return (
-      <div 
+      <div
         className={`
           relative overflow-hidden rounded-3xl p-8 border transition-all duration-300 group hover:-translate-y-2 animate-fade-in-up opacity-0
-          ${isPremium 
-            ? 'bg-gradient-to-b from-white to-indigo-50 dark:from-slate-900 dark:to-black border-blue-500 shadow-2xl shadow-blue-500/20' 
+          ${isPremium
+            ? 'bg-gradient-to-b from-white to-indigo-50 dark:from-slate-900 dark:to-black border-blue-500 shadow-2xl shadow-blue-500/20'
             : 'bg-glass-100 border-glass-border hover:bg-glass-200'}
           ${isValue ? 'ring-2 ring-amber-400/50' : ''}
         `}
         style={{ animationDelay: `${delay}ms` }}
       >
-        {isValue && (
-          <div className="absolute top-4 right-4 bg-amber-400 text-black text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            Meilleur choix
+        {plan.is_highlighted && plan.highlight_label && (
+          <div className={`absolute top-4 right-4 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${
+            isPremium ? 'bg-gradient-to-r from-amber-400 to-yellow-300 text-black' :
+            isValue ? 'bg-amber-400 text-black' :
+            'bg-blue-500 text-white'
+          }`}>
+            {plan.highlight_label}
           </div>
         )}
-        
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${color} bg-opacity-20`}>
-          <Icon size={28} className={color.replace('bg-', 'text-').replace('/20', '')} />
+
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${colorClass}`}>
+          <Icon size={28} className={colorClass.replace('bg-', 'text-').replace('/20', '')} />
         </div>
 
-        <h3 className={`text-xl font-bold mb-2 ${isPremium ? 'text-slate-900 dark:text-white' : 'text-glass-text'}`}>{title}</h3>
-        
+        <h3 className={`text-xl font-bold mb-2 ${isPremium ? 'text-slate-900 dark:text-white' : 'text-glass-text'}`}>
+          {plan.name}
+        </h3>
+
         <div className="flex items-baseline gap-1 mb-2">
-          <span className={`text-3xl font-black ${isPremium ? 'text-blue-600 dark:text-blue-400' : 'text-glass-text'}`}>{price}</span>
-          <span className="text-sm text-slate-500">{period}</span>
+          <span className={`text-3xl font-black ${isPremium ? 'text-blue-600 dark:text-blue-400' : 'text-glass-text'}`}>
+            {formatPrice(plan.price)}
+          </span>
+          <span className="text-sm text-slate-500">{plan.duration_label}</span>
         </div>
+
+        {plan.description && (
+          <p className="text-sm text-slate-500 mb-4">{plan.description}</p>
+        )}
 
         <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-500/20 to-transparent my-6"></div>
 
         <ul className="space-y-4 mb-8">
-          {features.map((feature: string, i: number) => (
+          {plan.features.map((feature: string, i: number) => (
             <li key={i} className="flex items-start gap-3 text-sm">
-               <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${isPremium ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400' : 'bg-green-500/20 text-green-500'}`}>
-                 <Check size={12} />
-               </div>
-               <span className={isPremium ? 'text-slate-600 dark:text-slate-300' : 'text-slate-500'}>{feature}</span>
+              <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                isPremium ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400' : 'bg-green-500/20 text-green-500'
+              }`}>
+                <Check size={12} />
+              </div>
+              <span className={isPremium ? 'text-slate-600 dark:text-slate-300' : 'text-slate-500'}>
+                {feature}
+              </span>
             </li>
           ))}
         </ul>
 
-        <Button 
-          variant={isPremium ? 'primary' : 'secondary'} 
+        <Button
+          variant={isPremium ? 'primary' : 'secondary'}
           className="w-full"
-          onClick={() => handleSubscribe(title)}
+          onClick={() => handleSubscribe(plan)}
         >
-          Choisir ce plan
+          {plan.price === 0 ? 'Commencer gratuitement' : 'Choisir ce plan'}
         </Button>
       </div>
     );
@@ -76,108 +141,36 @@ export const AllPlans: React.FC = () => {
         </Button>
         <div className="flex-1 text-center md:text-left mt-12 md:mt-0">
           <h1 className="text-4xl font-bold text-glass-text mb-2 animate-fade-in-up">Nos Formules d'Abonnement</h1>
-          <p className="text-slate-500 text-lg animate-fade-in-up" style={{ animationDelay: '100ms' }}>Choisissez la flexibilité qui vous convient pour réussir votre TCF Canada.</p>
+          <p className="text-slate-500 text-lg animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+            Choisissez la flexibilité qui vous convient pour réussir votre TCF Canada.
+          </p>
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        
-        {/* Short Term */}
-        <PlanCard 
-          title="Pass 24 Heures"
-          price="500 FCFA"
-          period="/ jour"
-          icon={Clock}
-          color="bg-slate-500/20"
-          delay={200}
-          features={[
-            "Accès complet pendant 24h",
-            "Idéal pour un test blanc rapide",
-            "Correction IA incluse"
-          ]}
-        />
+      {/* Loading State */}
+      {loading ? (
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="animate-spin text-blue-500" size={48} />
+        </div>
+      ) : (
+        <>
+          {/* Grid of Plans */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {plans.map((plan, index) => (
+              <PlanCard key={plan.id} plan={plan} delay={200 + index * 100} />
+            ))}
+          </div>
 
-        <PlanCard 
-          title="Pass Week-end"
-          price="1 000 FCFA"
-          period="/ 48h"
-          icon={Calendar}
-          color="bg-orange-500/20"
-          delay={300}
-          features={[
-            "Valable du Vendredi au Dimanche",
-            "Mode intensif débloqué",
-            "Accès aux 50+ séries",
-            "Support prioritaire"
-          ]}
-        />
+          {/* Empty State */}
+          {plans.length === 0 && (
+            <div className="text-center py-20 text-slate-500">
+              <p>Aucun plan disponible pour le moment.</p>
+            </div>
+          )}
+        </>
+      )}
 
-        <PlanCard 
-          title="Hebdomadaire"
-          price="2 000 FCFA"
-          period="/ semaine"
-          icon={Zap}
-          color="bg-blue-500/20"
-          delay={400}
-          features={[
-            "La formule la plus populaire",
-            "Accès illimité 7 jours",
-            "Statistiques de progression",
-            "Correction Expression Orale & Écrite"
-          ]}
-        />
-
-        <PlanCard 
-          title="Mensuel"
-          price="5 000 FCFA"
-          period="/ mois"
-          icon={Crown}
-          color="bg-purple-500/20"
-          type="value"
-          delay={500}
-          features={[
-            "Tout le pack Hebdo",
-            "Économisez 60% par rapport à l'hebdo",
-            "Badge certifié sur le profil",
-            "Accès aux webinaires exclusifs"
-          ]}
-        />
-
-        <PlanCard 
-          title="Trimestriel"
-          price="12 000 FCFA"
-          period="/ 3 mois"
-          icon={Users}
-          color="bg-emerald-500/20"
-          delay={600}
-          features={[
-            "Idéal pour une préparation longue",
-            "Accès complet pendant 90 jours",
-            "Plan de révision personnalisé IA",
-            "Garantie satisfaction"
-          ]}
-        />
-
-        <PlanCard 
-          title="Pack Excellence"
-          price="25 000 FCFA"
-          period="/ an"
-          icon={Crown}
-          type="premium"
-          color="bg-indigo-500/20"
-          delay={700}
-          features={[
-            "L'expérience ultime",
-            "Accès illimité pendant 1 an",
-            "3 Corrections humaines par mois",
-            "Coaching vidéo de 30min offert",
-            "Accès anticipé aux nouvelles séries"
-          ]}
-        />
-
-      </div>
-
+      {/* Contact Sales CTA */}
       <div className="mt-16 text-center bg-glass-100 p-8 rounded-2xl border border-glass-border animate-fade-in-up" style={{ animationDelay: '800ms' }}>
         <h3 className="text-xl font-bold mb-2">Besoin d'une offre pour votre école ou entreprise ?</h3>
         <p className="text-slate-500 mb-6">Nous proposons des tarifs de groupe et des tableaux de bord pour les enseignants.</p>
