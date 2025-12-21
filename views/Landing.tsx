@@ -3,9 +3,11 @@ import { ArrowRight, Check, Star, Zap, UserCheck, HelpCircle, Laptop, Clock, Bar
 import { Button } from '../components/GlassUI';
 import { useAppStore } from '../store/useAppStore';
 import { subscriptionService, SubscriptionPlan, formatPrice } from '../services/subscriptionService';
+import { useAuthStore } from '../store/useAuthStore';
 
 export const Landing: React.FC = () => {
-  const { setView, toggleAuthModal } = useAppStore();
+  const { setView, toggleAuthModal, selectPlanForCheckout } = useAppStore();
+  const { isAuthenticated } = useAuthStore();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
 
@@ -28,8 +30,22 @@ export const Landing: React.FC = () => {
     toggleAuthModal(true);
   };
 
-  const handlePricing = () => {
-    setView('SUBSCRIPTION');
+  const handleSelectPlan = (plan: SubscriptionPlan) => {
+    if (plan.price === 0) {
+      // Free plan - just open auth modal
+      toggleAuthModal(true);
+      return;
+    }
+    
+    if (!isAuthenticated) {
+      // Store pending plan and show auth modal
+      localStorage.setItem('pendingPlanId', plan.id.toString());
+      toggleAuthModal(true);
+      return;
+    }
+    
+    // Authenticated user - go to checkout with selected plan
+    selectPlanForCheckout(plan.id);
   };
 
   const handleViewAllPlans = () => {
@@ -317,6 +333,7 @@ export const Landing: React.FC = () => {
               {plans.map((plan) => (
                 <PricingCard
                   key={plan.id}
+                  plan={plan}
                   title={plan.name}
                   price={formatPrice(plan.price)}
                   period={plan.duration_label}
@@ -324,7 +341,7 @@ export const Landing: React.FC = () => {
                   isPopular={plan.is_highlighted}
                   highlightLabel={plan.highlight_label}
                   btnText={plan.price === 0 ? "Créer un compte" : "Choisir ce plan"}
-                  onClick={plan.price === 0 ? handleStart : handlePricing}
+                  onClick={() => handleSelectPlan(plan)}
                 />
               ))}
             </div>

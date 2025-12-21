@@ -8,7 +8,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import type { AuthModalMode } from '../types/auth';
 
 export const AuthModal: React.FC = () => {
-  const { toggleAuthModal, login: appLogin, showCheckEmail } = useAppStore();
+  const { toggleAuthModal, login: appLogin, showCheckEmail, selectPlanForCheckout } = useAppStore();
   const { login, register, forgotPassword, isLoading, error, clearError } = useAuthStore();
 
   const [mode, setMode] = useState<AuthModalMode>('login');
@@ -93,19 +93,25 @@ export const AuthModal: React.FC = () => {
           createdAt: authState.user.created_at,
           isPremium: false,
         });
-        toggleAuthModal(false); // Fermer la modal après connexion
+        
+        // Check if there's a pending plan to checkout
+        const pendingPlanId = localStorage.getItem('pendingPlanId');
+        if (pendingPlanId) {
+          localStorage.removeItem('pendingPlanId');
+          selectPlanForCheckout(parseInt(pendingPlanId, 10));
+        }
+        
+        toggleAuthModal(false);
       }
     } else if (mode === 'register') {
       await register(name, email, phone, password);
       showCheckEmail(email);
-      toggleAuthModal(false); // Fermer après inscription
+      toggleAuthModal(false);
     } else if (mode === 'forgot-password') {
       const message = await forgotPassword(email);
       setSuccessMessage(message);
-      // Ne pas fermer pour que l'utilisateur voie le message
     }
   } catch (err) {
-    // Error is handled by the store
     console.error('Auth error:', err);
   }
 };
