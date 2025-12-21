@@ -6,6 +6,7 @@ import { ModuleType } from '../types';
 import { useAppStore } from '../store/useAppStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { examService, UserExamHistory } from '../services/examService';
+import { subscriptionService } from '../services/subscriptionService';
 
 interface DashboardProps {
   onStartExam: (module: ModuleType) => void;
@@ -29,6 +30,7 @@ export const Dashboard: React.FC<DashboardProps> = () => {
   const [recentHistory, setRecentHistory] = useState<UserExamHistory[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
 
   // Get user's first name with friendly greeting
   const getGreeting = () => {
@@ -67,6 +69,20 @@ export const Dashboard: React.FC<DashboardProps> = () => {
     loadHistory();
   }, []);
 
+  // Load subscription status
+  useEffect(() => {
+    const loadSubscription = async () => {
+      try {
+        const status = await subscriptionService.getMySubscription();
+        setIsPremium(status.is_premium);
+      } catch (error) {
+        console.error('Failed to load subscription status:', error);
+      }
+    };
+
+    loadSubscription();
+  }, []);
+
   const handleModuleClick = (module: ModuleType) => {
     if (module === ModuleType.READING || module === ModuleType.LISTENING) {
         openSeriesSelection(module);
@@ -97,7 +113,7 @@ export const Dashboard: React.FC<DashboardProps> = () => {
           <p className="text-slate-400">Prêt pour votre prochaine simulation ?</p>
         </div>
         <div className="flex gap-2">
-          {user?.isPremium && (
+          {isPremium && (
             <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg flex items-center gap-2 animate-scale-in">
               <Award size={16} /> Premium
             </div>
