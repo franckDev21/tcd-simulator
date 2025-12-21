@@ -204,23 +204,26 @@ export const Checkout: React.FC = () => {
                     <h3 className="text-xl font-bold text-white mb-1">{plan.name}</h3>
                     <p className="text-sm text-slate-400">{plan.description || 'Accès complet au simulateur'}</p>
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-white">{priceNumber}</div>
-                    <div className="text-lg font-semibold text-white">FCFA</div>
+                  <div className="text-right flex flex-col items-end">
+                    <div className="text-3xl font-bold text-white leading-none mb-1">{priceNumber}</div>
+                    <div className="text-base font-bold text-white uppercase tracking-wider">FCFA</div>
                     <div className="text-xs text-slate-400 mt-1">/ {plan.duration_days} jours</div>
                   </div>
                 </div>
 
                 {/* Features - Only shown on selected plan */}
                 {isSelected && plan.features.length > 0 && (
-                  <ul className="mt-6 space-y-3">
-                    {plan.features.slice(0, 3).map((feature, i) => (
-                      <li key={i} className="flex items-center gap-3 text-sm text-slate-300">
-                        <Check size={16} className="text-green-400 shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
+                  <>
+                    <div className="h-px w-full bg-slate-500/20 my-5"></div>
+                    <ul className="space-y-3">
+                      {plan.features.slice(0, 3).map((feature, i) => (
+                        <li key={i} className="flex items-center gap-3 text-sm text-slate-300">
+                          <Check size={16} className="text-green-400 shrink-0" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
                 )}
               </div>
             );
