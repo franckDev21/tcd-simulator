@@ -81,7 +81,7 @@ export const Landing: React.FC = () => {
             <Button onClick={handleStart} className="w-full sm:w-auto h-14 text-lg shadow-xl shadow-blue-500/20 transform hover:scale-105 transition-transform">
               Commencer gratuitement <ArrowRight className="ml-2" />
             </Button>
-            <Button variant="secondary" onClick={handlePricing} className="w-full sm:w-auto h-14 text-lg">
+            <Button variant="secondary" onClick={handleViewAllPlans} className="w-full sm:w-auto h-14 text-lg">
               Voir les tarifs
             </Button>
           </div>
