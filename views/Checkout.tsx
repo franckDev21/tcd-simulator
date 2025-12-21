@@ -182,7 +182,9 @@ export const Checkout: React.FC = () => {
         <div className="space-y-4">
           {plans.slice(0, 2).map((plan) => {
             const isSelected = selectedPlan?.id === plan.id;
-            const Icon = getIconForPlan(plan);
+            
+            // Format price: split number and currency
+            const priceNumber = new Intl.NumberFormat('fr-FR').format(plan.price);
             
             return (
               <div
@@ -191,38 +193,35 @@ export const Checkout: React.FC = () => {
                 className={`
                   relative p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300
                   ${isSelected 
-                    ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20' 
-                    : 'border-glass-border bg-glass-100 hover:border-glass-border hover:bg-glass-200'
+                    ? 'border-blue-500 bg-glass-100' 
+                    : 'border-glass-border bg-glass-100/50 hover:bg-glass-100'
                   }
                 `}
               >
-                {/* Selection indicator */}
-                {isSelected && (
-                  <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
-                    <Check size={14} className="text-white" />
-                  </div>
-                )}
-
+                {/* Plan Header */}
                 <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-bold text-glass-text mb-1">{plan.name}</h3>
-                    <p className="text-sm text-slate-500">{plan.description || 'Accès complet au simulateur'}</p>
+                  <div className="flex-1 pr-4">
+                    <h3 className="text-xl font-bold text-white mb-1">{plan.name}</h3>
+                    <p className="text-sm text-slate-400">{plan.description || 'Accès complet au simulateur'}</p>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-black text-glass-text">{formatPrice(plan.price)}</div>
-                    <div className="text-xs text-slate-500">{plan.duration_label}</div>
+                    <div className="text-2xl font-bold text-white">{priceNumber}</div>
+                    <div className="text-lg font-semibold text-white">FCFA</div>
+                    <div className="text-xs text-slate-400 mt-1">/ {plan.duration_days} jours</div>
                   </div>
                 </div>
 
-                {/* Features */}
-                <ul className="mt-4 space-y-2">
-                  {plan.features.slice(0, 3).map((feature, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-slate-400">
-                      <Check size={14} className={isSelected ? 'text-blue-400' : 'text-green-500'} />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+                {/* Features - Only shown on selected plan */}
+                {isSelected && plan.features.length > 0 && (
+                  <ul className="mt-6 space-y-3">
+                    {plan.features.slice(0, 3).map((feature, i) => (
+                      <li key={i} className="flex items-center gap-3 text-sm text-slate-300">
+                        <Check size={16} className="text-green-400 shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             );
           })}
