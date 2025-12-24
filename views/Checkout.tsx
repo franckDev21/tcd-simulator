@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Check, Loader2, AlertCircle, Smartphone, CreditCard, Lock, Shield, Sparkles, ChevronDown, Calendar } from 'lucide-react';
 import { Button, GlassCard } from '../components/GlassUI';
-import { useAppStore } from '../store/useAppStore';
 import { subscriptionService, SubscriptionPlan } from '../services/subscriptionService';
 import { paymentService, PaymentMethod, getPaymentMethodColor } from '../services/paymentService';
+import { ROUTES } from '../router';
 
 type PaymentStep = 'input' | 'processing' | 'redirecting' | 'error';
 
@@ -48,7 +49,9 @@ const MOCK_METHODS: PaymentMethod[] = [
 ];
 
 export const Checkout: React.FC = () => {
-  const { selectedPlanId, setView } = useAppStore();
+  const navigate = useNavigate();
+  const { planId } = useParams<{ planId: string }>();
+  const selectedPlanId = planId ? parseInt(planId, 10) : null;
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
@@ -188,7 +191,7 @@ export const Checkout: React.FC = () => {
         <GlassCard className="text-center max-w-sm p-6">
           <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
           <h2 className="text-lg font-bold text-white mb-2">Aucun plan sélectionné</h2>
-          <Button onClick={() => setView('ALL_PLANS')} className="mt-4">Voir les plans</Button>
+          <Button onClick={() => navigate(ROUTES.PLANS)} className="mt-4">Voir les plans</Button>
         </GlassCard>
       </div>
     );
@@ -214,7 +217,7 @@ export const Checkout: React.FC = () => {
       {/* Header */}
       <div className="max-w-4xl mx-auto mb-6">
         <button
-          onClick={() => setView('ALL_PLANS')}
+          onClick={() => navigate(ROUTES.PLANS)}
           className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm mb-4"
         >
           <ArrowLeft size={16} />

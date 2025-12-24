@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Check, X, Clock, Award, Calendar, FileText, Headphones, Mic, Loader2, Volume2 } from 'lucide-react';
 import { GlassCard, Button, ProgressBar } from '../components/GlassUI';
-import { useAppStore } from '../store/useAppStore';
 import { examService, ExamAttemptDetail } from '../services/examService';
 import { getStorageUrl } from '../services/api';
 import { ModuleType } from '../types';
+import { ROUTES } from '../router';
 
 const moduleTypeMap: Record<string, ModuleType> = {
   'CE': ModuleType.READING,
@@ -30,7 +31,9 @@ const getLevelColor = (level: string) => {
 };
 
 export const AttemptDetail: React.FC = () => {
-  const { activeAttemptId, setView } = useAppStore();
+  const navigate = useNavigate();
+  const { attemptId } = useParams<{ attemptId: string }>();
+  const activeAttemptId = attemptId ? parseInt(attemptId, 10) : null;
   const [attempt, setAttempt] = useState<ExamAttemptDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
@@ -38,7 +41,7 @@ export const AttemptDetail: React.FC = () => {
   useEffect(() => {
     const loadAttempt = async () => {
       if (!activeAttemptId) {
-        setView('HISTORY');
+        navigate(ROUTES.HISTORY);
         return;
       }
       try {
@@ -47,13 +50,13 @@ export const AttemptDetail: React.FC = () => {
         setAttempt(data);
       } catch (error) {
         console.error('Failed to load attempt:', error);
-        setView('HISTORY');
+        navigate(ROUTES.HISTORY);
       } finally {
         setLoading(false);
       }
     };
     loadAttempt();
-  }, [activeAttemptId, setView]);
+  }, [activeAttemptId, navigate]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -98,7 +101,7 @@ export const AttemptDetail: React.FC = () => {
       <div className="flex items-center gap-4 mb-6">
         <Button
           variant="ghost"
-          onClick={() => setView('HISTORY')}
+          onClick={() => navigate(ROUTES.HISTORY)}
           className="p-2"
         >
           <ArrowLeft size={20} />
@@ -288,7 +291,7 @@ export const AttemptDetail: React.FC = () => {
 
       {/* Back Button */}
       <div className="mt-8 flex justify-center">
-        <Button onClick={() => setView('HISTORY')} variant="secondary">
+        <Button onClick={() => navigate(ROUTES.HISTORY)} variant="secondary">
           <ArrowLeft size={18} className="mr-2" />
           Retour à l'historique
         </Button>

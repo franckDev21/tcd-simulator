@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, Mic, Headphones, Clock, Award, TrendingUp, Loader2, History, ChevronRight } from 'lucide-react';
 import { GlassCard, Button } from '../components/GlassUI';
 import { ScoreHistoryChart } from '../components/Charts';
@@ -7,10 +8,15 @@ import { useAppStore } from '../store/useAppStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { examService, UserExamHistory } from '../services/examService';
 import { subscriptionService } from '../services/subscriptionService';
+import { ROUTES } from '../router';
 
-interface DashboardProps {
-  onStartExam: (module: ModuleType) => void;
-}
+// Map ModuleType to URL-friendly code
+const moduleToCode: Record<ModuleType, string> = {
+  [ModuleType.READING]: 'CE',
+  [ModuleType.LISTENING]: 'CO',
+  [ModuleType.WRITING]: 'EE',
+  [ModuleType.SPEAKING]: 'EO',
+};
 
 // Map module_type code to ModuleType enum
 const moduleTypeMap: Record<string, ModuleType> = {
@@ -24,8 +30,9 @@ const getModuleTypeFromCode = (code: string): ModuleType => {
   return moduleTypeMap[code] || ModuleType.READING;
 };
 
-export const Dashboard: React.FC<DashboardProps> = () => {
-  const { openSeriesSelection, startExam, setView, viewAttemptDetail } = useAppStore();
+export const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const { activeModule, setActiveModule } = useAppStore();
   const { user } = useAuthStore();
   const [recentHistory, setRecentHistory] = useState<UserExamHistory[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
@@ -84,11 +91,12 @@ export const Dashboard: React.FC<DashboardProps> = () => {
   }, []);
 
   const handleModuleClick = (module: ModuleType) => {
-    if (module === ModuleType.READING || module === ModuleType.LISTENING) {
-        openSeriesSelection(module);
-    } else {
-        startExam(module);
-    }
+    const moduleCode = moduleToCode[module];
+    navigate(ROUTES.SERIES_SELECTION(moduleCode));
+  };
+
+  const handleViewAttempt = (attemptId: number) => {
+    navigate(ROUTES.ATTEMPT_DETAIL(attemptId));
   };
 
   // Format date for display
@@ -210,7 +218,7 @@ export const Dashboard: React.FC<DashboardProps> = () => {
                   return (
                     <div
                       key={item.id}
-                      onClick={() => viewAttemptDetail(item.id)}
+                      onClick={() => handleViewAttempt(item.id)}
                       className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition cursor-pointer group animate-fade-in-up opacity-0 hover:scale-[1.02] transform duration-200"
                       style={{ animationDelay: `${400 + (idx * 100)}ms` }}
                     >
@@ -240,7 +248,7 @@ export const Dashboard: React.FC<DashboardProps> = () => {
             <Button
               variant="ghost"
               className="w-full mt-6 text-sm"
-              onClick={() => setView('HISTORY')}
+              onClick={() => navigate(ROUTES.HISTORY)}
             >
               Voir tout l'historique
             </Button>

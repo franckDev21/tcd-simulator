@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Award, Clock, Loader2, ChevronRight, FileText, Headphones, Mic } from 'lucide-react';
 import { GlassCard, Button } from '../components/GlassUI';
-import { useAppStore } from '../store/useAppStore';
 import { examService, UserExamHistory } from '../services/examService';
 import { ModuleType } from '../types';
+import { ROUTES } from '../router';
 
 // Map module_type code to ModuleType enum
 const moduleTypeMap: Record<string, ModuleType> = {
@@ -40,7 +41,7 @@ const getLevelColor = (level: string) => {
 };
 
 export const HistoryPage: React.FC = () => {
-  const { setView, viewAttemptDetail } = useAppStore();
+  const navigate = useNavigate();
   const [history, setHistory] = useState<UserExamHistory[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -83,7 +84,7 @@ export const HistoryPage: React.FC = () => {
       <div className="flex items-center gap-4 mb-8">
         <Button
           variant="ghost"
-          onClick={() => setView('DASHBOARD')}
+          onClick={() => navigate(ROUTES.DASHBOARD)}
           className="p-2"
         >
           <ArrowLeft size={20} />
@@ -103,7 +104,7 @@ export const HistoryPage: React.FC = () => {
           <Clock size={48} className="mx-auto mb-4 text-slate-500" />
           <h2 className="text-xl font-semibold mb-2">Aucun historique</h2>
           <p className="text-slate-400 mb-6">Vous n'avez pas encore passé de simulation.</p>
-          <Button onClick={() => setView('DASHBOARD')}>
+          <Button onClick={() => navigate(ROUTES.DASHBOARD)}>
             Commencer une simulation
           </Button>
         </GlassCard>
@@ -118,7 +119,7 @@ export const HistoryPage: React.FC = () => {
                 key={item.id}
                 className="cursor-pointer hover:bg-white/10 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg animate-fade-in-up opacity-0"
                 style={{ animationDelay: `${idx * 50}ms` }}
-                onClick={() => viewAttemptDetail(item.id)}
+                onClick={() => navigate(ROUTES.ATTEMPT_DETAIL(item.id))}
               >
                 <div className="flex items-center justify-between">
                   {/* Left Section */}

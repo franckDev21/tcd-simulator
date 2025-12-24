@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Camera, Save, ArrowLeft, AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
 import { GlassCard, Button } from '../components/GlassUI';
 import { PhoneInput } from '../components/PhoneInput';
@@ -7,9 +8,11 @@ import { useAppStore } from '../store/useAppStore';
 import { useAuthStore } from '../store/useAuthStore';
 import profileService from '../services/profileService';
 import { getStorageUrl } from '../services/api';
+import { ROUTES } from '../router';
 
 export const EditProfile: React.FC = () => {
-  const { user, updateUser, setView } = useAppStore();
+  const navigate = useNavigate();
+  const { user, updateUser } = useAppStore();
   const { setUser } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -182,7 +185,7 @@ export const EditProfile: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 animate-fade-in">
       <div className="flex items-center gap-4 mb-8">
-        <Button variant="ghost" onClick={() => setView('PROFILE')}>
+        <Button variant="ghost" onClick={() => navigate(ROUTES.PROFILE)}>
           <ArrowLeft size={20} /> Retour
         </Button>
         <h1 className="text-3xl font-bold">Modifier le profil</h1>

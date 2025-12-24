@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Mail, User as UserIcon, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import { GlassCard, Button } from './GlassUI';
 import { PhoneInput } from './PhoneInput';
 import { PasswordInput } from './PasswordInput';
 import { useAppStore } from '../store/useAppStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { ROUTES } from '../router';
 import type { AuthModalMode } from '../types/auth';
 
 export const AuthModal: React.FC = () => {
+  const navigate = useNavigate();
   const { toggleAuthModal, login: appLogin, showCheckEmail, selectPlanForCheckout } = useAppStore();
   const { login, register, forgotPassword, isLoading, error, clearError } = useAuthStore();
 
@@ -107,6 +110,7 @@ export const AuthModal: React.FC = () => {
       await register(name, email, phone, password);
       showCheckEmail(email);
       toggleAuthModal(false);
+      navigate(ROUTES.CHECK_EMAIL);
     } else if (mode === 'forgot-password') {
       const message = await forgotPassword(email);
       setSuccessMessage(message);

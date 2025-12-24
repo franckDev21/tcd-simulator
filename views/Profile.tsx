@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mail, Calendar, Award, Phone, Settings } from 'lucide-react';
 import { GlassCard, Button } from '../components/GlassUI';
 import { useAppStore } from '../store/useAppStore';
 import { MOCK_HISTORY } from '../constants';
 import { getStorageUrl } from '../services/api';
+import { ROUTES } from '../router';
 
 /**
  * Format a date string to French locale format
@@ -26,7 +28,8 @@ const formatDate = (dateString: string | undefined): string => {
 };
 
 export const Profile: React.FC = () => {
-  const { user, setView } = useAppStore();
+  const navigate = useNavigate();
+  const { user } = useAppStore();
 
   if (!user) return <div>Non connecté</div>;
 
@@ -35,7 +38,7 @@ export const Profile: React.FC = () => {
       {/* Header Profile */}
       <GlassCard className="flex flex-col md:flex-row items-center gap-6 p-8 relative">
         <div className="absolute top-4 right-4">
-           <Button variant="ghost" onClick={() => setView('EDIT_PROFILE')} className="text-sm">
+           <Button variant="ghost" onClick={() => navigate(ROUTES.EDIT_PROFILE)} className="text-sm">
              <Settings size={16} /> Éditer le profil
            </Button>
         </div>
@@ -64,7 +67,7 @@ export const Profile: React.FC = () => {
                 <Award size={12} /> PREMIUM {user.subscriptionPlan === 'monthly' ? 'MENSUEL' : 'HEBDO'}
               </span>
             ) : (
-              <Button variant="secondary" onClick={() => setView('SUBSCRIPTION')} className="text-xs h-8 px-4">
+              <Button variant="secondary" onClick={() => navigate(ROUTES.SUBSCRIPTION)} className="text-xs h-8 px-4">
                 Passer Premium
               </Button>
             )}

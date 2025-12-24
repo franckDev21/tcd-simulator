@@ -1,26 +1,36 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Lock, ArrowLeft, Loader } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { ModuleType } from '../types';
 import { Button } from '../components/GlassUI';
 import { examService, ExamSeries } from '../services/examService';
+import { ROUTES } from '../router';
 
-interface SeriesSelectionProps {
-  onSelectSeries: (seriesId: number) => void;
-}
+// Map URL code to ModuleType
+const codeToModule: Record<string, ModuleType> = {
+  'CE': ModuleType.READING,
+  'CO': ModuleType.LISTENING,
+  'EE': ModuleType.WRITING,
+  'EO': ModuleType.SPEAKING,
+};
 
-export const SeriesSelection: React.FC<SeriesSelectionProps> = ({ onSelectSeries }) => {
-  const { activeModule, user, setView } = useAppStore();
+export const SeriesSelection: React.FC = () => {
+  const navigate = useNavigate();
+  const { module } = useParams<{ module: string }>();
+  const { user } = useAppStore();
   const [seriesList, setSeriesList] = useState<ExamSeries[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const moduleCode = decodeURIComponent(module || 'CE');
+  const activeModule = codeToModule[moduleCode] || ModuleType.READING;
 
   useEffect(() => {
     const fetchSeries = async () => {
         try {
             const data = await examService.getAllExams();
-            // Filter by Active Module
-            const backendCode = getBackendModuleCode(activeModule);
-            const filtered = data.filter(s => s.module_type === backendCode);
+            // Filter by module code from URL
+            const filtered = data.filter(s => s.module_type === moduleCode);
             setSeriesList(filtered);
         } catch (error) {
             console.error("Failed to fetch exams", error);
@@ -28,25 +38,17 @@ export const SeriesSelection: React.FC<SeriesSelectionProps> = ({ onSelectSeries
             setLoading(false);
         }
     };
-    if (activeModule) fetchSeries();
-  }, [activeModule]);
-
-  const getBackendModuleCode = (m: ModuleType | null): string => {
-    if (m === ModuleType.READING) return 'CE';
-    if (m === ModuleType.LISTENING) return 'CO';
-    if (m === ModuleType.WRITING) return 'EE';
-    if (m === ModuleType.SPEAKING) return 'EO';
-    return 'CE';
-  }
+    fetchSeries();
+  }, [moduleCode]);
 
   const handleSeriesClick = (series: ExamSeries) => {
     // If premium is required
     if (series.is_premium && !user?.isPremium) {
-      if (confirm("Cette série est réservée aux membres Premium. Voulez-vous voir les offres ?")) {
-        setView('SUBSCRIPTION');
+      if (confirm("Cette serie est reservee aux membres Premium. Voulez-vous voir les offres ?")) {
+        navigate(ROUTES.SUBSCRIPTION);
       }
     } else {
-      onSelectSeries(series.id);
+      navigate(ROUTES.EXAM(moduleCode, series.id));
     }
   };
 
@@ -55,7 +57,7 @@ export const SeriesSelection: React.FC<SeriesSelectionProps> = ({ onSelectSeries
       {/* Responsive Header */}
       <div className="flex flex-col md:flex-row items-center gap-4 mb-8 relative">
         <div className="w-full md:w-auto flex justify-start">
-          <Button variant="ghost" onClick={() => setView('DASHBOARD')} className="pl-0 md:pl-4">
+          <Button variant="ghost" onClick={() => navigate(ROUTES.DASHBOARD)} className="pl-0 md:pl-4">
             <ArrowLeft size={20} className="mr-2" /> Retour
           </Button>
         </div>
@@ -111,7 +113,7 @@ export const SeriesSelection: React.FC<SeriesSelectionProps> = ({ onSelectSeries
           <div className="mt-8 md:mt-12 p-6 rounded-2xl bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-blue-500/30 text-center animate-fade-in-up opacity-0" style={{ animationDelay: '600ms' }}>
               <h3 className="text-lg md:text-xl font-bold text-white mb-2">Débloquez les 50+ Séries</h3>
               <p className="text-slate-300 mb-6 text-sm md:text-base">Accédez à l'intégralité des examens blancs et maximisez votre score.</p>
-              <Button onClick={() => setView('SUBSCRIPTION')} className="w-full md:w-auto px-8">Passer Premium</Button>
+              <Button onClick={() => navigate(ROUTES.SUBSCRIPTION)} className="w-full md:w-auto px-8">Passer Premium</Button>
           </div>
       )}
     </div>

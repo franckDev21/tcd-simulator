@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check, Zap, Crown, Clock, Calendar, Users, Loader2 } from 'lucide-react';
 import { Button } from '../components/GlassUI';
 import { useAppStore } from '../store/useAppStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { subscriptionService, SubscriptionPlan, formatPrice } from '../services/subscriptionService';
+import { ROUTES } from '../router';
 
 // Map duration_days to appropriate icon
 const getIconForDuration = (days: number) => {
@@ -27,7 +29,8 @@ const getColorClass = (badgeColor: string | null, isHighlighted: boolean): strin
 };
 
 export const AllPlans: React.FC = () => {
-  const { setView, selectPlanForCheckout, toggleAuthModal } = useAppStore();
+  const navigate = useNavigate();
+  const { toggleAuthModal } = useAppStore();
   const { isAuthenticated } = useAuthStore();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +58,7 @@ export const AllPlans: React.FC = () => {
     }
 
     // Redirect to checkout page with selected plan
-    selectPlanForCheckout(plan.id);
+    navigate(ROUTES.CHECKOUT(plan.id));
   };
 
   const PlanCard = ({ plan, delay }: { plan: SubscriptionPlan; delay: number }) => {
@@ -136,7 +139,7 @@ export const AllPlans: React.FC = () => {
     <div className="min-h-screen p-6 md:p-12 max-w-7xl mx-auto animate-fade-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-center gap-6 mb-16 relative">
-        <Button variant="ghost" onClick={() => setView('LANDING')} className="absolute left-0 top-0 md:static">
+        <Button variant="ghost" onClick={() => navigate(ROUTES.HOME)} className="absolute left-0 top-0 md:static">
           <ArrowLeft size={20} className="mr-2" /> Retour
         </Button>
         <div className="flex-1 text-center md:text-left mt-12 md:mt-0">
@@ -174,7 +177,7 @@ export const AllPlans: React.FC = () => {
       <div className="mt-16 text-center bg-glass-100 p-8 rounded-2xl border border-glass-border animate-fade-in-up" style={{ animationDelay: '800ms' }}>
         <h3 className="text-xl font-bold mb-2">Besoin d'une offre pour votre école ou entreprise ?</h3>
         <p className="text-slate-500 mb-6">Nous proposons des tarifs de groupe et des tableaux de bord pour les enseignants.</p>
-        <Button variant="secondary" onClick={() => setView('CONTACT_SALES')}>Contacter l'équipe commerciale</Button>
+        <Button variant="secondary" onClick={() => navigate(ROUTES.CONTACT)}>Contacter l'équipe commerciale</Button>
       </div>
     </div>
   );

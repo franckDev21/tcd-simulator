@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ModuleType, Question, CorrectionResult, UserResult } from '../types';
 import { GlassCard, Button, ProgressBar } from '../components/GlassUI';
 import { Timer, Volume2, Flag, ChevronLeft, ChevronRight, Check, Loader } from 'lucide-react';
@@ -7,9 +8,22 @@ import { VoiceRecorder } from '../components/VoiceRecorder';
 import { useAppStore } from '../store/useAppStore';
 import { examService, ApiQuestion } from '../services/examService';
 import { getStorageUrl } from '../services/api';
+import { ROUTES } from '../router';
+
+// Map URL code to ModuleType
+const codeToModule: Record<string, ModuleType> = {
+  'CE': ModuleType.READING,
+  'CO': ModuleType.LISTENING,
+  'EE': ModuleType.WRITING,
+  'EO': ModuleType.SPEAKING,
+};
 
 export const ExamRunner: React.FC = () => {
-    const { setView, completeExam, activeSeriesId, activeModule } = useAppStore();
+    const navigate = useNavigate();
+    const { module, seriesId } = useParams<{ module: string; seriesId: string }>();
+    const moduleCode = decodeURIComponent(module || 'CE');
+    const activeSeriesId = seriesId ? parseInt(seriesId, 10) : null;
+    const activeModule = codeToModule[moduleCode] || ModuleType.READING;
 
     // Data State
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -63,14 +77,14 @@ export const ExamRunner: React.FC = () => {
             } catch (error) {
                 console.error("Failed to load exam", error);
                 alert("Erreur lors du chargement de l'examen.");
-                setView('DASHBOARD');
+                navigate(ROUTES.DASHBOARD);
             } finally {
                 setLoadingExam(false);
             }
         };
 
         loadExam();
-    }, [activeSeriesId, setView]);
+    }, [activeSeriesId, navigate]);
 
     // Timer
     useEffect(() => {
@@ -144,7 +158,7 @@ export const ExamRunner: React.FC = () => {
                 alert("Erreur lors de la soumission de l'examen.");
             } finally {
                 setLoadingCorrection(false);
-                completeExam();
+                navigate(ROUTES.RESULTS);
             }
         }
 
@@ -205,7 +219,7 @@ export const ExamRunner: React.FC = () => {
                 console.error("Submit failed", e);
             } finally {
                 setLoadingCorrection(false);
-                completeExam();
+                navigate(ROUTES.RESULTS);
             }
         }
     };

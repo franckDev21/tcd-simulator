@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mail, RefreshCw, ArrowLeft, CheckCircle } from 'lucide-react';
 import { GlassCard, Button } from '../components/GlassUI';
 import { useAuthStore } from '../store/useAuthStore';
+import { useAppStore } from '../store/useAppStore';
+import { ROUTES } from '../router';
 
-interface CheckEmailProps {
-  email: string;
-  onBack: () => void;
-}
-
-export const CheckEmail: React.FC<CheckEmailProps> = ({ email, onBack }) => {
+export const CheckEmail: React.FC = () => {
+  const navigate = useNavigate();
+  const { pendingVerificationEmail, clearPendingEmail } = useAppStore();
   const { resendVerification, isLoading } = useAuthStore();
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resendError, setResendError] = useState('');
+
+  // Get email from store
+  const email = pendingVerificationEmail || '';
+
+  const handleBack = () => {
+    clearPendingEmail();
+    navigate(ROUTES.HOME);
+  };
 
   const handleResend = async () => {
     setResendSuccess(false);
@@ -28,7 +36,7 @@ export const CheckEmail: React.FC<CheckEmailProps> = ({ email, onBack }) => {
     <div className="min-h-screen flex items-center justify-center p-4">
       <GlassCard className="w-full max-w-md text-center">
         <button
-          onClick={onBack}
+          onClick={handleBack}
           className="absolute top-4 left-4 text-slate-400 hover:text-white transition-colors flex items-center gap-1"
         >
           <ArrowLeft size={16} />

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Crown, Calendar, Clock, Check, AlertTriangle, Loader2, History, CreditCard } from 'lucide-react';
 import { Button, GlassCard } from '../components/GlassUI';
 import { PaymentModal } from '../components/PaymentModal';
-import { useAppStore } from '../store/useAppStore';
 import {
   subscriptionService,
   SubscriptionStatus,
@@ -11,11 +11,12 @@ import {
   TransactionHistoryItem,
   formatPrice,
 } from '../services/subscriptionService';
+import { ROUTES } from '../router';
 
 type TabType = 'current' | 'history' | 'transactions';
 
 export const Subscription: React.FC = () => {
-  const { setView } = useAppStore();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<SubscriptionStatus | null>(null);
   const [history, setHistory] = useState<SubscriptionHistoryItem[]>([]);
@@ -132,7 +133,7 @@ export const Subscription: React.FC = () => {
     <div className="min-h-screen p-6 md:p-12 max-w-4xl mx-auto animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
-        <Button variant="ghost" onClick={() => setView('DASHBOARD')}>
+        <Button variant="ghost" onClick={() => navigate(ROUTES.DASHBOARD)}>
           <ArrowLeft size={20} />
         </Button>
         <h1 className="text-2xl font-bold text-glass-text">Mon Abonnement</h1>
@@ -265,7 +266,7 @@ export const Subscription: React.FC = () => {
               <p className="text-slate-500 mb-6">
                 Souscrivez à un abonnement pour accéder à toutes les fonctionnalités premium.
               </p>
-              <Button variant="primary" onClick={() => setView('ALL_PLANS')}>
+              <Button variant="primary" onClick={() => navigate(ROUTES.PLANS)}>
                 Voir les plans
               </Button>
             </GlassCard>

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GlassCard, Button } from '../components/GlassUI';
-import { useAppStore } from '../store/useAppStore';
 import { Check, X, ArrowLeft, AlertCircle } from 'lucide-react';
 import { UserResult } from '../types';
+import { ROUTES } from '../router';
 
 export const Correction: React.FC = () => {
-  const { setView } = useAppStore();
+  const navigate = useNavigate();
   const [result, setResult] = useState<UserResult | null>(null);
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export const Correction: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-8 animate-fade-in">
       <div className="flex items-center justify-between mb-8">
-        <Button variant="ghost" onClick={() => setView('RESULTS')} className="pl-2">
+        <Button variant="ghost" onClick={() => navigate(ROUTES.RESULTS)} className="pl-2">
           <ArrowLeft size={18} /> Retour aux résultats
         </Button>
         <div className="text-lg font-bold">Correction Détaillée</div>

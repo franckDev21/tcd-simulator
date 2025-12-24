@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GlassCard, Button } from '../components/GlassUI';
-import { useAppStore } from '../store/useAppStore';
 import { ChevronDown, ChevronUp, Eye, RotateCcw, ArrowLeft, Download } from 'lucide-react';
 import { ProgressBar } from '../components/GlassUI';
 import { ModuleType } from '../types';
 import { jsPDF } from 'jspdf';
+import { ROUTES } from '../router';
 
 export const ResultsView: React.FC = () => {
-  const { setView } = useAppStore();
+  const navigate = useNavigate();
   const [result, setResult] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -47,32 +48,52 @@ export const ResultsView: React.FC = () => {
   // ============================================
   // Analyse la performance temporelle du candidat
   //
-  // Principe: On compare le temps utilisé (timeSpent) au temps total (totalTime)
-  //
-  // Zones de performance:
-  // - Excellent (90-100%): Le candidat a utilisé entre 70% et 95% du temps
-  //   => Il a pris son temps mais pas trop, optimal pour la réflexion
-  //
-  // - Bien (70-89%): Le candidat a utilisé entre 50% et 70% OU entre 95% et 100%
-  //   => Soit un peu rapide (peut améliorer la vérification)
-  //   => Soit un peu serré (gérer mieux le rythme)
-  //
-  // - Moyen (40-69%): Le candidat a utilisé moins de 50% du temps
-  //   => Trop rapide, risque de réponses précipitées
-  //
-  // - Insuffisant (<40%): Le candidat a utilisé plus de 100% (temps écoulé)
-  //   => N'a pas pu finir dans les temps
+  // Pour les QCM (CE, CO): On veut que le candidat utilise 30-95% du temps
+  // Pour Expression (EE, EO): Le temps minimum acceptable est basé sur le temps absolu
+  //   - Expression écrite: minimum 5 min pour une rédaction correcte
+  //   - L'important est de ne pas dépasser le temps
   const calculateTimeManagement = () => {
     if (!result || !result.timeSpent || !result.totalTime || result.totalTime === 0) {
       return { value: 50, display: 'N/A', label: 'Non mesuré' };
     }
 
+    const timeSpentMinutes = result.timeSpent / 60;
     const timeRatio = result.timeSpent / result.totalTime;
+    const isExpressionModule = result.module === ModuleType.WRITING || result.module === ModuleType.SPEAKING;
 
-    // Cas 1: Temps optimal (70-95% du temps utilisé)
-    // Le candidat a bien géré son temps avec marge pour vérifier
-    if (timeRatio >= 0.70 && timeRatio <= 0.95) {
-      const score = 90 + Math.round((1 - Math.abs(0.825 - timeRatio) / 0.125) * 10);
+    // Pour les modules d'expression, on évalue différemment
+    if (isExpressionModule) {
+      // Temps dépassé = Insuffisant
+      if (timeRatio > 1.0) {
+        const overrunPenalty = Math.min(30, (timeRatio - 1.0) * 100);
+        return {
+          value: Math.max(10, 40 - overrunPenalty),
+          display: 'Insuffisant',
+          label: 'Temps dépassé'
+        };
+      }
+
+      // Pour expression écrite/orale, on veut au moins 5 minutes de réflexion
+      // Excellent: >= 10 min et <= 85% du temps
+      // Bien: >= 5 min et <= 95% du temps
+      // Acceptable: >= 3 min
+      // Moyen: < 3 min
+      if (timeSpentMinutes >= 10 && timeRatio <= 0.85) {
+        return { value: 95, display: 'Excellent', label: 'Temps bien utilisé' };
+      }
+      if (timeSpentMinutes >= 5 && timeRatio <= 0.95) {
+        return { value: 80, display: 'Bien', label: 'Bonne gestion' };
+      }
+      if (timeSpentMinutes >= 3) {
+        return { value: 65, display: 'Acceptable', label: 'Un peu rapide' };
+      }
+      return { value: 45, display: 'Moyen', label: 'Très rapide' };
+    }
+
+    // Pour les QCM (CE, CO)
+    // Cas 1: Temps optimal (50-90% du temps utilisé)
+    if (timeRatio >= 0.50 && timeRatio <= 0.90) {
+      const score = 85 + Math.round((1 - Math.abs(0.70 - timeRatio) / 0.20) * 15);
       return {
         value: Math.min(100, score),
         display: 'Excellent',
@@ -80,23 +101,18 @@ export const ResultsView: React.FC = () => {
       };
     }
 
-    // Cas 2: Bien géré mais améliorable
-    // Soit un peu rapide (50-70%), soit serré (95-100%)
-    if ((timeRatio >= 0.50 && timeRatio < 0.70) || (timeRatio > 0.95 && timeRatio <= 1.0)) {
-      const score = 70 + Math.round((timeRatio >= 0.50 && timeRatio < 0.70
-        ? (timeRatio - 0.50) / 0.20
-        : (1.0 - timeRatio) / 0.05) * 15);
+    // Cas 2: Bien géré mais améliorable (30-50% ou 90-100%)
+    if ((timeRatio >= 0.30 && timeRatio < 0.50) || (timeRatio > 0.90 && timeRatio <= 1.0)) {
       return {
-        value: Math.min(89, Math.max(70, score)),
+        value: 75,
         display: 'Bien',
-        label: timeRatio < 0.70 ? 'Un peu rapide' : 'Temps serré'
+        label: timeRatio < 0.50 ? 'Un peu rapide' : 'Temps serré'
       };
     }
 
-    // Cas 3: Trop rapide (moins de 50%)
-    // Risque d'erreurs par précipitation
-    if (timeRatio < 0.50) {
-      const score = 40 + Math.round((timeRatio / 0.50) * 29);
+    // Cas 3: Trop rapide (moins de 30%)
+    if (timeRatio < 0.30) {
+      const score = 40 + Math.round((timeRatio / 0.30) * 25);
       return {
         value: Math.max(40, score),
         display: 'Moyen',
@@ -105,7 +121,6 @@ export const ResultsView: React.FC = () => {
     }
 
     // Cas 4: Temps dépassé (plus de 100%)
-    // Le candidat n'a pas pu finir dans les temps
     const overrunPenalty = Math.min(30, (timeRatio - 1.0) * 100);
     return {
       value: Math.max(10, 40 - overrunPenalty),
@@ -407,17 +422,17 @@ export const ResultsView: React.FC = () => {
 
       {/* Action Buttons */}
       <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-        <Button onClick={() => setView('DASHBOARD')} variant="secondary" icon={ArrowLeft}>
+        <Button onClick={() => navigate(ROUTES.DASHBOARD)} variant="secondary" icon={ArrowLeft}>
           Retour au Dashboard
         </Button>
-        
+
         {hasQCMCorrection && (
-          <Button onClick={() => setView('CORRECTION')} variant="secondary" className="bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30 text-blue-300" icon={Eye}>
+          <Button onClick={() => navigate(ROUTES.CORRECTION)} variant="secondary" className="bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30 text-blue-300" icon={Eye}>
             Voir la correction
           </Button>
         )}
 
-        <Button onClick={() => setView('EXAM_RUNNER')} variant="primary" icon={RotateCcw}>
+        <Button onClick={() => navigate(ROUTES.DASHBOARD)} variant="primary" icon={RotateCcw}>
           Refaire un test
         </Button>
       </div>

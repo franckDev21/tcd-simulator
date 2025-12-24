@@ -1,11 +1,11 @@
-
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Building2, Users, Mail, Phone, User, CheckCircle } from 'lucide-react';
 import { GlassCard, Button } from '../components/GlassUI';
-import { useAppStore } from '../store/useAppStore';
+import { ROUTES } from '../router';
 
 export const ContactSales: React.FC = () => {
-  const { setView } = useAppStore();
+  const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 

@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, Star, Zap, UserCheck, HelpCircle, Laptop, Clock, BarChart3, Smartphone, ChevronRight, TrendingUp, Loader2 } from 'lucide-react';
 import { Button } from '../components/GlassUI';
 import { useAppStore } from '../store/useAppStore';
 import { subscriptionService, SubscriptionPlan, formatPrice } from '../services/subscriptionService';
 import { useAuthStore } from '../store/useAuthStore';
+import { ROUTES } from '../router';
 
 export const Landing: React.FC = () => {
-  const { setView, toggleAuthModal, selectPlanForCheckout } = useAppStore();
+  const navigate = useNavigate();
+  const { toggleAuthModal } = useAppStore();
   const { isAuthenticated } = useAuthStore();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
@@ -45,11 +48,11 @@ export const Landing: React.FC = () => {
     }
     
     // Authenticated user - go to checkout with selected plan
-    selectPlanForCheckout(plan.id);
+    navigate(ROUTES.CHECKOUT(plan.id));
   };
 
   const handleViewAllPlans = () => {
-    setView('ALL_PLANS');
+    navigate(ROUTES.PLANS);
   };
 
   return (

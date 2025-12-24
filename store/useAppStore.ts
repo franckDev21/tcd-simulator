@@ -79,9 +79,9 @@ export const useAppStore = create<AppState>()(
         view: 'DASHBOARD'
       })),
 
-      showCheckEmail: (email) => set({ pendingVerificationEmail: email, view: 'CHECK_EMAIL', isAuthModalOpen: false }),
+      showCheckEmail: (email) => set({ pendingVerificationEmail: email, isAuthModalOpen: false }),
 
-      clearPendingEmail: () => set({ pendingVerificationEmail: null, view: 'LANDING' }),
+      clearPendingEmail: () => set({ pendingVerificationEmail: null }),
 
       viewAttemptDetail: (attemptId) => set({ activeAttemptId: attemptId, view: 'ATTEMPT_DETAIL' }),
 
