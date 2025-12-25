@@ -41,6 +41,7 @@ export interface UserSubscription {
 export interface SubscriptionStatus {
   has_subscription: boolean;
   is_premium: boolean;
+  has_ai_correction?: boolean;
   subscription: UserSubscription | null;
 }
 

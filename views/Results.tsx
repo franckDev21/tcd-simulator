@@ -1,22 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlassCard, Button } from '../components/GlassUI';
-import { ChevronDown, ChevronUp, Eye, RotateCcw, ArrowLeft, Download } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye, RotateCcw, ArrowLeft, Download, Check, X, Flag, MinusCircle } from 'lucide-react';
 import { ProgressBar } from '../components/GlassUI';
-import { ModuleType } from '../types';
+import { ModuleType, Question } from '../types';
 import { jsPDF } from 'jspdf';
 import { ROUTES } from '../router';
+import { getStorageUrl } from '../services/api';
 
 export const ResultsView: React.FC = () => {
   const navigate = useNavigate();
   const [result, setResult] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [selectedQuestionIdx, setSelectedQuestionIdx] = useState<number | null>(null);
+  const [showLevelAnimation, setShowLevelAnimation] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('lastExamResult');
     if (saved) {
-      setResult(JSON.parse(saved));
+      const parsed = JSON.parse(saved);
+      setResult(parsed);
+
+      // Also get flagged questions from localStorage (saved during exam)
+      const flaggedData = localStorage.getItem('lastExamFlagged');
+      if (flaggedData) {
+        parsed.flaggedQuestions = JSON.parse(flaggedData);
+        setResult({ ...parsed });
+      }
     }
+
+    // Trigger level animation after a short delay
+    setTimeout(() => setShowLevelAnimation(true), 500);
   }, []);
 
   // ============================================
@@ -311,10 +325,18 @@ export const ResultsView: React.FC = () => {
           <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-glass-text to-slate-500 mb-2">
             {result.score} <span className="text-2xl text-slate-500 font-normal">/ 699</span>
           </div>
-          <div className={`inline-flex items-center px-4 py-1 rounded-full text-sm font-bold mt-4 border border-glass-border ${
-            ['C1', 'C2'].includes(result.level) ? 'bg-green-500/20 text-green-500' : 'bg-blue-500/20 text-blue-500'
-          }`}>
-            Niveau {result.level}
+          {/* Animated Level Badge */}
+          <div className={`inline-flex items-center px-6 py-2 rounded-full text-lg font-bold mt-4 border-2 transition-all duration-700 transform ${
+            showLevelAnimation ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
+          } ${
+            ['C1', 'C2'].includes(result.level)
+              ? 'bg-gradient-to-r from-green-500/30 to-emerald-500/30 text-green-400 border-green-500/50 shadow-lg shadow-green-500/20'
+              : ['B1', 'B2'].includes(result.level)
+              ? 'bg-gradient-to-r from-blue-500/30 to-indigo-500/30 text-blue-400 border-blue-500/50 shadow-lg shadow-blue-500/20'
+              : 'bg-gradient-to-r from-amber-500/30 to-orange-500/30 text-amber-400 border-amber-500/50 shadow-lg shadow-amber-500/20'
+          } ${showLevelAnimation ? 'animate-pulse-slow' : ''}`}>
+            <span className="mr-2">Niveau</span>
+            <span className={`text-2xl font-black ${showLevelAnimation ? 'animate-bounce-subtle' : ''}`}>{result.level}</span>
           </div>
         </GlassCard>
 
@@ -356,6 +378,177 @@ export const ResultsView: React.FC = () => {
            </div>
         </GlassCard>
       </div>
+
+      {/* Question Navigator - Only for QCM modules */}
+      {hasQCMCorrection && result.questions && result.questions.length > 0 && (
+        <div className="w-full mb-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+          <GlassCard>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Eye size={18} className="text-blue-400" />
+              Aperçu des Questions
+            </h3>
+
+            {/* Question Navigator Grid */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {result.questions.map((q: Question, idx: number) => {
+                const userAnswer = result.userAnswers?.[q.id];
+                const isCorrect = userAnswer === q.correctAnswer;
+                const isSkipped = userAnswer === undefined || userAnswer === null;
+                const isFlagged = result.flaggedQuestions?.[q.id];
+                const isSelected = selectedQuestionIdx === idx;
+
+                // Determine button style based on state
+                let btnClass = "w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all duration-200 border-2 cursor-pointer transform hover:scale-110 ";
+
+                if (isFlagged) {
+                  // Yellow for flagged/review
+                  btnClass += "bg-yellow-500/30 text-yellow-300 border-yellow-500 hover:bg-yellow-500/40";
+                } else if (isSkipped) {
+                  // White/neutral for skipped
+                  btnClass += "bg-slate-700/50 text-slate-300 border-slate-500 hover:bg-slate-600/50";
+                } else if (isCorrect) {
+                  // Green for correct
+                  btnClass += "bg-green-500/30 text-green-300 border-green-500 hover:bg-green-500/40";
+                } else {
+                  // Red for wrong
+                  btnClass += "bg-red-500/30 text-red-300 border-red-500 hover:bg-red-500/40";
+                }
+
+                // Add selected state
+                if (isSelected) {
+                  btnClass += " ring-2 ring-white/50 scale-110";
+                }
+
+                return (
+                  <button
+                    key={q.id}
+                    onClick={() => setSelectedQuestionIdx(isSelected ? null : idx)}
+                    className={btnClass}
+                    title={`Question ${idx + 1}: ${isSkipped ? 'Ignorée' : isCorrect ? 'Correcte' : 'Incorrecte'}${isFlagged ? ' (marquée à réviser)' : ''}`}
+                  >
+                    {idx + 1}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Legend */}
+            <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-glass-border text-xs text-slate-400">
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded bg-green-500/30 border border-green-500 flex items-center justify-center">
+                  <Check size={10} className="text-green-300" />
+                </span>
+                <span>Correct</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded bg-red-500/30 border border-red-500 flex items-center justify-center">
+                  <X size={10} className="text-red-300" />
+                </span>
+                <span>Incorrect</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded bg-slate-700/50 border border-slate-500 flex items-center justify-center">
+                  <MinusCircle size={10} className="text-slate-300" />
+                </span>
+                <span>Ignoré</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded bg-yellow-500/30 border border-yellow-500 flex items-center justify-center">
+                  <Flag size={10} className="text-yellow-300" />
+                </span>
+                <span>À réviser</span>
+              </div>
+
+              {/* Stats */}
+              <div className="ml-auto flex gap-4 text-xs">
+                <span className="text-green-400">{result.correctCount || 0} correct{(result.correctCount || 0) > 1 ? 's' : ''}</span>
+                <span className="text-red-400">{(result.totalQuestions || 0) - (result.correctCount || 0)} incorrect{((result.totalQuestions || 0) - (result.correctCount || 0)) > 1 ? 's' : ''}</span>
+              </div>
+            </div>
+
+            {/* Selected Question Preview */}
+            {selectedQuestionIdx !== null && result.questions[selectedQuestionIdx] && (
+              <div className="mt-6 pt-6 border-t border-glass-border animate-fade-in">
+                {(() => {
+                  const q = result.questions[selectedQuestionIdx];
+                  const userAnswer = result.userAnswers?.[q.id];
+                  const isCorrect = userAnswer === q.correctAnswer;
+                  const isSkipped = userAnswer === undefined || userAnswer === null;
+
+                  return (
+                    <div className="space-y-4">
+                      {/* Question Header */}
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold ${
+                          isSkipped ? 'bg-slate-700/50 text-slate-300' :
+                          isCorrect ? 'bg-green-500/30 text-green-300' : 'bg-red-500/30 text-red-300'
+                        }`}>
+                          {selectedQuestionIdx + 1}
+                        </div>
+                        <div className="flex-1">
+                          <span className={`text-xs font-bold px-2 py-1 rounded ${
+                            isSkipped ? 'bg-slate-500/20 text-slate-400' :
+                            isCorrect ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                          }`}>
+                            {isSkipped ? 'NON RÉPONDU' : isCorrect ? 'CORRECT' : 'INCORRECT'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Question Image */}
+                      {q.imageUrl && (
+                        <div className="rounded-xl overflow-hidden border border-glass-border">
+                          <img
+                            src={getStorageUrl(q.imageUrl) || q.imageUrl}
+                            alt="Question"
+                            className="w-full h-auto max-h-[300px] object-contain bg-black/30"
+                          />
+                        </div>
+                      )}
+
+                      {/* Question Text */}
+                      <p className="text-glass-text leading-relaxed text-lg">{q.text}</p>
+
+                      {/* Options */}
+                      <div className="space-y-2">
+                        {q.options?.map((opt: string, optIdx: number) => {
+                          const isUserChoice = userAnswer === optIdx;
+                          const isCorrectOption = q.correctAnswer === optIdx;
+
+                          let optClass = "w-full text-left p-3 rounded-xl border transition-all flex items-center gap-3 ";
+
+                          if (isCorrectOption) {
+                            optClass += "bg-green-500/20 border-green-500/50 text-green-300";
+                          } else if (isUserChoice && !isCorrectOption) {
+                            optClass += "bg-red-500/20 border-red-500/50 text-red-300";
+                          } else {
+                            optClass += "bg-glass-100 border-glass-border text-slate-400";
+                          }
+
+                          return (
+                            <div key={optIdx} className={optClass}>
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                isCorrectOption ? 'bg-green-500/30 border-2 border-green-500' :
+                                isUserChoice ? 'bg-red-500/30 border-2 border-red-500' :
+                                'bg-slate-700/50 border-2 border-slate-600'
+                              }`}>
+                                {String.fromCharCode(65 + optIdx)}
+                              </div>
+                              <span className="flex-1">{opt}</span>
+                              {isCorrectOption && <Check size={18} className="text-green-400" />}
+                              {isUserChoice && !isCorrectOption && <X size={18} className="text-red-400" />}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+          </GlassCard>
+        </div>
+      )}
 
       {/* Writing/Speaking AI Feedback */}
       {result.feedback && (

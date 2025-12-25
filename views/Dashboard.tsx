@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Mic, Headphones, Clock, Award, TrendingUp, Loader2, History, ChevronRight } from 'lucide-react';
+import { FileText, Mic, Headphones, Clock, Award, TrendingUp, Loader2, History, ChevronRight, Flag, BookOpen } from 'lucide-react';
 import { GlassCard, Button } from '../components/GlassUI';
 import { ScoreHistoryChart } from '../components/Charts';
 import { ModuleType } from '../types';
-import { useAppStore } from '../store/useAppStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { examService, UserExamHistory } from '../services/examService';
 import { subscriptionService } from '../services/subscriptionService';
+import { flaggedQuestionsService, FlaggedQuestionCount } from '../services/flaggedQuestionsService';
 import { ROUTES } from '../router';
 
 // Map ModuleType to URL-friendly code
@@ -32,12 +32,12 @@ const getModuleTypeFromCode = (code: string): ModuleType => {
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { activeModule, setActiveModule } = useAppStore();
   const { user } = useAuthStore();
   const [recentHistory, setRecentHistory] = useState<UserExamHistory[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
+  const [flaggedCount, setFlaggedCount] = useState<FlaggedQuestionCount | null>(null);
 
   // Get user's first name with friendly greeting
   const getGreeting = () => {
@@ -56,7 +56,7 @@ export const Dashboard: React.FC = () => {
     const loadHistory = async () => {
       try {
         setLoadingHistory(true);
-        const history = await examService.getUserHistory(6);
+        const history = await examService.getUserHistory(3);
         setRecentHistory(history);
 
         // Transform for chart (last 7 results for trend)
@@ -88,6 +88,20 @@ export const Dashboard: React.FC = () => {
     };
 
     loadSubscription();
+  }, []);
+
+  // Load flagged questions count
+  useEffect(() => {
+    const loadFlaggedCount = async () => {
+      try {
+        const count = await flaggedQuestionsService.getCount();
+        setFlaggedCount(count);
+      } catch (error) {
+        console.error('Failed to load flagged questions count:', error);
+      }
+    };
+
+    loadFlaggedCount();
   }, []);
 
   const handleModuleClick = (module: ModuleType) => {
@@ -196,7 +210,41 @@ export const Dashboard: React.FC = () => {
 
         {/* Sidebar / History */}
         <div className="space-y-6">
-          <GlassCard className="h-full animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+          {/* Flagged Questions Card - Always visible */}
+          <GlassCard
+            className="animate-fade-in-up cursor-pointer group hover:bg-glass-200 transition-all"
+            style={{ animationDelay: '280ms' }}
+            onClick={() => navigate(ROUTES.FLAGGED_QUESTIONS)}
+          >
+            <div className="flex items-center gap-4">
+              <div className={`w-14 h-14 rounded-xl border flex items-center justify-center group-hover:scale-110 transition-transform ${
+                flaggedCount && flaggedCount.unresolved > 0
+                  ? 'bg-gradient-to-br from-yellow-500/30 to-amber-500/30 border-yellow-500/50'
+                  : 'bg-gradient-to-br from-slate-500/20 to-slate-600/20 border-slate-500/30'
+              }`}>
+                <Flag size={24} className={flaggedCount && flaggedCount.unresolved > 0 ? 'text-yellow-400' : 'text-slate-400'} />
+              </div>
+              <div className="flex-1">
+                <h3 className={`font-semibold flex items-center gap-2 ${
+                  flaggedCount && flaggedCount.unresolved > 0 ? 'text-yellow-400' : 'text-slate-300'
+                }`}>
+                  <BookOpen size={16} /> Questions à réviser
+                </h3>
+                <p className="text-sm text-slate-400 mt-1">
+                  {flaggedCount && flaggedCount.unresolved > 0
+                    ? `${flaggedCount.unresolved} question${flaggedCount.unresolved > 1 ? 's' : ''} en attente`
+                    : 'Aucune question marquée'}
+                </p>
+              </div>
+              <ChevronRight size={20} className={`transition-colors ${
+                flaggedCount && flaggedCount.unresolved > 0
+                  ? 'text-slate-500 group-hover:text-yellow-400'
+                  : 'text-slate-600 group-hover:text-slate-400'
+              }`} />
+            </div>
+          </GlassCard>
+
+          <GlassCard className="animate-fade-in-up" style={{ animationDelay: '300ms' }}>
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Clock size={18} /> Activité Récente
             </h3>

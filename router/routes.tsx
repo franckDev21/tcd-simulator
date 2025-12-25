@@ -22,6 +22,8 @@ import { HistoryPage } from '../views/HistoryPage';
 import { AttemptDetail } from '../views/AttemptDetail';
 import { Checkout } from '../views/Checkout';
 import { PaymentResult } from '../views/PaymentResult';
+import { FlaggedQuestions } from '../views/FlaggedQuestions';
+import { WritingChoice } from '../views/WritingChoice';
 
 export const router = createBrowserRouter([
   {
@@ -151,6 +153,22 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: 'review',
+        element: (
+          <ProtectedRoute>
+            <FlaggedQuestions />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'exam/writing/choice',
+        element: (
+          <ProtectedRoute>
+            <WritingChoice />
+          </ProtectedRoute>
+        ),
+      },
 
       // Catch-all redirect
       {
@@ -181,4 +199,6 @@ export const ROUTES = {
   ATTEMPT_DETAIL: (attemptId: number) => `/history/${attemptId}`,
   CHECKOUT: (planId: number) => `/checkout/${planId}`,
   PAYMENT_RESULT: '/payment/result',
+  FLAGGED_QUESTIONS: '/review',
+  WRITING_CHOICE: '/exam/writing/choice',
 } as const;

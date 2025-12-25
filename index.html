@@ -192,7 +192,55 @@
       .animate-fade-in {
         animation: opacity 0.5s ease-out forwards;
       }
-      
+
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-fade-in-down {
+        animation: fadeInDown 0.4s ease-out forwards;
+      }
+
+      /* Slow pulse animation for level badge */
+      @keyframes pulseSlow {
+        0%, 100% {
+          opacity: 1;
+          box-shadow: 0 0 0 0 currentColor;
+        }
+        50% {
+          opacity: 0.9;
+          box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+        }
+      }
+
+      .animate-pulse-slow {
+        animation: pulseSlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+
+      /* Subtle bounce for level text */
+      @keyframes bounceSubtle {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        25% {
+          transform: translateY(-2px);
+        }
+        75% {
+          transform: translateY(1px);
+        }
+      }
+
+      .animate-bounce-subtle {
+        animation: bounceSubtle 1s ease-in-out 1;
+      }
+
       /* Stagger delays are handled via inline styles in React */
     </style>
   <script type="importmap">

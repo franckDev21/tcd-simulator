@@ -9,6 +9,20 @@ import type {
 } from '../types/auth';
 import { AxiosError } from 'axios';
 
+export interface ProfileStats {
+  total_tests: number;
+  best_score: number;
+  estimated_level: string;
+  level_progress: number;
+  recent_history: {
+    id: number;
+    module: string;
+    date: string;
+    score: number;
+    level: string;
+  }[];
+}
+
 const extractErrorMessage = (error: unknown): string => {
   if (error instanceof AxiosError) {
     const data = error.response?.data;
@@ -85,6 +99,18 @@ export const profileService = {
   async updatePassword(passwordData: UpdatePasswordData): Promise<MessageResponse> {
     try {
       const { data } = await api.put<MessageResponse>('/profile/password', passwordData);
+      return data;
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
+    }
+  },
+
+  /**
+   * Get user profile statistics
+   */
+  async getStats(): Promise<ProfileStats> {
+    try {
+      const { data } = await api.get<ProfileStats>('/profile/stats');
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));

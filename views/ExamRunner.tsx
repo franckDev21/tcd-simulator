@@ -7,6 +7,7 @@ import { gradeWritingSubmission } from '../services/geminiService';
 import { VoiceRecorder } from '../components/VoiceRecorder';
 import { useAppStore } from '../store/useAppStore';
 import { examService, ApiQuestion } from '../services/examService';
+import { flaggedQuestionsService } from '../services/flaggedQuestionsService';
 import { getStorageUrl } from '../services/api';
 import { ROUTES } from '../router';
 
@@ -114,52 +115,27 @@ export const ExamRunner: React.FC = () => {
 
         // --- WRITING MODULE ---
         if (activeModule === ModuleType.WRITING) {
-            setLoadingCorrection(true);
-            const text = answers[questions[0].id] || "";
+            // Collect all tasks answers
+            const tasksAnswers = questions.map((q, idx) => ({
+                question_id: q.id,
+                task_number: idx + 1,
+                subject: q.text,
+                answer_text: answers[q.id] || ''
+            }));
 
-            try {
-                const result = await gradeWritingSubmission(questions[0].text, text);
-                setCorrectionResult(result);
+            // Save to localStorage for the choice page
+            const writingData = {
+                seriesId: activeSeriesId,
+                tasks: tasksAnswers,
+                questions: questions,
+                timeSpent: timeSpent,
+                totalTime: initialTime,
+            };
+            localStorage.setItem('pendingWritingExam', JSON.stringify(writingData));
 
-                // Save to Backend
-                await examService.submitAttempt({
-                    exam_series_id: activeSeriesId,
-                    score: result.score,
-                    max_score: 699,
-                    level: result.level,
-                    time_spent: timeSpent,
-                    feedback: result.feedback,
-                    corrected_text: result.correctedText,
-                    answers: [{
-                        question_id: questions[0].id,
-                        answer_text: text
-                    }]
-                });
-
-                // Local Storage for Results View
-                const examResult: UserResult = {
-                    id: Date.now().toString(),
-                    date: new Date().toISOString().split('T')[0],
-                    module: activeModule,
-                    score: result.score,
-                    maxScore: 699,
-                    level: result.level,
-                    feedback: result.feedback,
-                    correctionJson: result,
-                    questions: questions,
-                    userAnswers: answers,
-                    timeSpent: timeSpent,
-                    totalTime: initialTime,
-                };
-                localStorage.setItem('lastExamResult', JSON.stringify(examResult));
-
-            } catch (error) {
-                console.error("Correction failed", error);
-                alert("Erreur lors de la soumission de l'examen.");
-            } finally {
-                setLoadingCorrection(false);
-                navigate(ROUTES.RESULTS);
-            }
+            // Navigate to choice page (correction IA ou impression)
+            navigate(ROUTES.WRITING_CHOICE);
+            return;
         }
 
         // --- QCM MODULES (READING / LISTENING) ---
@@ -215,6 +191,24 @@ export const ExamRunner: React.FC = () => {
                     totalTime: initialTime,
                 };
                 localStorage.setItem('lastExamResult', JSON.stringify(examResult));
+
+                // Save flagged questions to localStorage for Results page
+                localStorage.setItem('lastExamFlagged', JSON.stringify(flagged));
+
+                // Send flagged questions to API
+                const flaggedQuestionIds = Object.keys(flagged).filter(k => flagged[parseInt(k)]);
+                if (flaggedQuestionIds.length > 0) {
+                    try {
+                        await flaggedQuestionsService.flag(
+                            flaggedQuestionIds.map(id => ({
+                                question_id: parseInt(id),
+                                reason: 'review' as const
+                            }))
+                        );
+                    } catch (flagError) {
+                        console.error("Failed to save flagged questions:", flagError);
+                    }
+                }
             } catch (e) {
                 console.error("Submit failed", e);
             } finally {
@@ -290,59 +284,91 @@ export const ExamRunner: React.FC = () => {
                 <ProgressBar value={answeredCount} max={questions.length} />
             </div>
 
-            {/* Question Navigator with Legend */}
-            <div className="mb-6 animate-fade-in">
-                <GlassCard className="p-4">
-                    <div className="flex flex-wrap gap-2 mb-4 justify-start content-start">
-                        {questions.map((q, idx) => {
-                            const isAnswered = answers[q.id] !== undefined;
-                            const isCurrent = idx === currentIdx;
-                            const isFlagged = flagged[q.id];
+            {/* Question Navigator - Different for Writing module */}
+            {activeModule === ModuleType.WRITING ? (
+                /* Writing Module: Show 3 Task buttons side by side */
+                <div className="mb-6 animate-fade-in">
+                    <GlassCard className="p-4">
+                        <div className="flex gap-3 justify-center">
+                            {questions.map((q, idx) => {
+                                const isAnswered = answers[q.id] && String(answers[q.id]).trim().length > 0;
+                                const isCurrent = idx === currentIdx;
 
-                            let btnClass = "w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 border-2 ";
-
-                            if (isCurrent) {
-                                btnClass += "bg-white text-slate-900 border-blue-500 ring-2 ring-blue-500/30 scale-105 shadow-lg font-bold";
-                            } else if (isFlagged) {
-                                btnClass += "bg-yellow-400 text-yellow-900 border-yellow-500";
-                            } else if (isAnswered) {
-                                btnClass += "bg-slate-700 text-white border-slate-600";
-                            } else {
-                                btnClass += "bg-transparent text-slate-400 border-slate-600 hover:bg-slate-800";
-                            }
-
-                            return (
-                                <button
-                                    key={q.id}
-                                    onClick={() => setCurrentIdx(idx)}
-                                    className={btnClass}
-                                >
-                                    {idx + 1}
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    {/* Legend */}
-                    <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-glass-border text-xs text-slate-400">
-                        <div className="flex items-center gap-2">
-                            <span className="w-4 h-4 rounded-full bg-transparent border-2 border-slate-600"></span>
-                            <span>Actuel</span>
+                                return (
+                                    <button
+                                        key={q.id}
+                                        onClick={() => setCurrentIdx(idx)}
+                                        className={`flex-1 max-w-[200px] py-4 px-6 rounded-xl text-base font-semibold transition-all duration-200 border-2 flex items-center justify-center gap-2 ${
+                                            isCurrent
+                                                ? 'bg-blue-500 text-white border-blue-400 shadow-lg shadow-blue-500/30 scale-105'
+                                                : isAnswered
+                                                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 hover:bg-emerald-500/30'
+                                                : 'bg-glass-200 text-slate-400 border-glass-border hover:border-slate-500 hover:bg-glass-300'
+                                        }`}
+                                    >
+                                        Tâche {idx + 1}
+                                        {isAnswered && !isCurrent && <Check size={16} />}
+                                    </button>
+                                );
+                            })}
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="w-4 h-4 rounded-full bg-yellow-400 border-2 border-yellow-500"></span>
-                            <span>Révision</span>
+                    </GlassCard>
+                </div>
+            ) : (
+                /* QCM Modules: Show numbered question navigator with legend */
+                <div className="mb-6 animate-fade-in">
+                    <GlassCard className="p-4">
+                        <div className="flex flex-wrap gap-2 mb-4 justify-start content-start">
+                            {questions.map((q, idx) => {
+                                const isAnswered = answers[q.id] !== undefined;
+                                const isCurrent = idx === currentIdx;
+                                const isFlagged = flagged[q.id];
+
+                                let btnClass = "w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 border-2 ";
+
+                                if (isCurrent) {
+                                    btnClass += "bg-white text-slate-900 border-blue-500 ring-2 ring-blue-500/30 scale-105 shadow-lg font-bold";
+                                } else if (isFlagged) {
+                                    btnClass += "bg-yellow-400 text-yellow-900 border-yellow-500";
+                                } else if (isAnswered) {
+                                    btnClass += "bg-slate-700 text-white border-slate-600";
+                                } else {
+                                    btnClass += "bg-transparent text-slate-400 border-slate-600 hover:bg-slate-800";
+                                }
+
+                                return (
+                                    <button
+                                        key={q.id}
+                                        onClick={() => setCurrentIdx(idx)}
+                                        className={btnClass}
+                                    >
+                                        {idx + 1}
+                                    </button>
+                                );
+                            })}
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="w-4 h-4 rounded-full bg-slate-700 border-2 border-slate-600"></span>
-                            <span>Répondu</span>
+
+                        {/* Legend */}
+                        <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-glass-border text-xs text-slate-400">
+                            <div className="flex items-center gap-2">
+                                <span className="w-4 h-4 rounded-full bg-transparent border-2 border-slate-600"></span>
+                                <span>Actuel</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="w-4 h-4 rounded-full bg-yellow-400 border-2 border-yellow-500"></span>
+                                <span>Révision</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="w-4 h-4 rounded-full bg-slate-700 border-2 border-slate-600"></span>
+                                <span>Répondu</span>
+                            </div>
+                            {flaggedCount > 0 && (
+                                <span className="ml-auto text-yellow-400">{flaggedCount} marquée(s) pour révision</span>
+                            )}
                         </div>
-                        {flaggedCount > 0 && (
-                            <span className="ml-auto text-yellow-400">{flaggedCount} marquée(s) pour révision</span>
-                        )}
-                    </div>
-                </GlassCard>
-            </div>
+                    </GlassCard>
+                </div>
+            )}
 
             {/* Main Question Card */}
             <GlassCard className="flex-1 flex flex-col relative">
@@ -449,23 +475,54 @@ export const ExamRunner: React.FC = () => {
                         </div>
                     </div>
                 ) : activeModule === ModuleType.WRITING ? (
-                    <div className="flex flex-col h-full min-h-[500px]">
-                        <div className="mb-4 text-slate-300 bg-glass-200 p-4 rounded-xl border border-glass-border leading-relaxed">
-                            {currentQ.text}
-                        </div>
-                        <textarea
-                            className="flex-1 w-full bg-glass-200 border border-glass-border rounded-xl p-4 text-glass-text outline-none focus:border-blue-500/50 resize-none font-sans leading-relaxed transition-all focus:bg-glass-300 min-h-[350px]"
-                            placeholder="Écrivez votre réponse ici..."
-                            value={answers[currentQ.id] || ''}
-                            onChange={(e) => setAnswers({...answers, [currentQ.id]: e.target.value})}
-                        />
-                        <div className="mt-4 flex justify-between items-center text-sm text-slate-500">
-                            <span className="font-mono text-blue-400 font-bold bg-blue-500/10 px-3 py-1.5 rounded-lg">
-                                {getWordCount(answers[currentQ.id] || '')} mots
-                            </span>
-                            <Button onClick={handleFinish} loading={loadingCorrection}>
-                                Soumettre pour correction
-                            </Button>
+                    <div className="flex flex-col h-full">
+                        {/* Current Task */}
+                        <div className="flex-1 flex flex-col min-h-[400px]">
+                            {/* Task Header */}
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="inline-flex items-center px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/30">
+                                    <span className="text-indigo-400 text-sm font-bold">Tâche {currentIdx + 1} / {questions.length}</span>
+                                </div>
+                            </div>
+
+                            {/* Subject */}
+                            <div className="mb-4 bg-gradient-to-r from-slate-800/60 to-slate-900/60 p-5 rounded-xl border border-slate-600/30">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded">Sujet</span>
+                                </div>
+                                <p className="text-slate-200 leading-relaxed">{currentQ.text}</p>
+                            </div>
+
+                            {/* Text Area */}
+                            <textarea
+                                className="flex-1 w-full bg-glass-200 border border-glass-border rounded-xl p-4 text-glass-text outline-none focus:border-blue-500/50 resize-none font-sans leading-relaxed transition-all focus:bg-glass-300 min-h-[250px]"
+                                placeholder="Rédigez votre réponse ici..."
+                                value={answers[currentQ.id] || ''}
+                                onChange={(e) => setAnswers({...answers, [currentQ.id]: e.target.value})}
+                            />
+
+                            {/* Footer */}
+                            <div className="mt-4 flex justify-between items-center">
+                                <span className="font-mono text-blue-400 font-bold bg-blue-500/10 px-3 py-1.5 rounded-lg text-sm">
+                                    {getWordCount(answers[currentQ.id] || '')} mots
+                                </span>
+                                <div className="flex gap-3">
+                                    {currentIdx > 0 && (
+                                        <Button variant="ghost" onClick={() => setCurrentIdx(prev => prev - 1)}>
+                                            <ChevronLeft size={16} className="mr-1" /> Tâche précédente
+                                        </Button>
+                                    )}
+                                    {currentIdx < questions.length - 1 ? (
+                                        <Button variant="secondary" onClick={() => setCurrentIdx(prev => prev + 1)}>
+                                            Tâche suivante <ChevronRight size={16} className="ml-1" />
+                                        </Button>
+                                    ) : (
+                                        <Button onClick={handleFinish} loading={loadingCorrection} variant="primary" icon={Check}>
+                                            Terminer l'épreuve
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ) : (
